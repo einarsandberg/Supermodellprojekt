@@ -1,6 +1,10 @@
 % mg-ks(t)=ms'(t)
-m = 0.01;
-k = 10;
+c = 1.7; %luftmotståndskoefficient
+d = 0.4; %densitet
+a = 0.0025; %tvärsnittsarea i m^2
+v = s'; %hastighet
+m = 0.005; %massa i kg
+k = (1/2)*c*d*a*v^2; %luftmotstånd
 g = 9.82;
 
 
