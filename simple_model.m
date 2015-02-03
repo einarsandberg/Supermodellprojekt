@@ -1,4 +1,6 @@
 % mg-ks(t)=ms'(t)
+
+syms s(t)
 c = 1.7; %luftmotståndskoefficient
 d = 0.4; %densitet
 a = 0.0025; %tvärsnittsarea i m^2
@@ -8,7 +10,6 @@ k = (1/2)*c*d*a*v^2; %luftmotstånd
 g = 9.82;
 
 
-syms s(t)
 s(t) = dsolve(m*g - k*s == m*diff(s), s(0)==0)
 
 %hmmm plot
