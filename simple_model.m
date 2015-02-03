@@ -5,4 +5,3 @@ v_initial=0;
 plot(t,v)
 
 
-
