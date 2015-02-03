@@ -3,6 +3,9 @@
 #include <chrono>
 #include <ctime>
 #include <math.h>
+#include <string>
+#include <fstream>
+#include <vector>
 
 using namespace std;
 double pos = 0;
@@ -27,28 +30,22 @@ void display()
     int  k = 1;
     double time = glfwGetTime();
     
-   
-    
-    double speed = (0.05)*(1-exp(-time));
+    double speed = 19.1893 - 19.1893*exp(-0.5117*time);
     
     pos+=speed*time;
-    cout << speed << "  ";
+   // cout << speed << "  ";
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     
     glPushMatrix();
     glScalef(0.1f, 0.1f, 0.1f);
     glPushMatrix();
-    glTranslatef(0, -pos, 0.0f);
+    glTranslatef(0, -pos/100, 0.0f);
     glPushMatrix();
     drawPolygon();
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
-    
-
 }
-
-
 
 int main(void)
 {
