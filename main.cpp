@@ -1,6 +1,14 @@
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <chrono>
+#include <ctime>
+#include <math.h>
+#include <string>
+#include <fstream>
+#include <vector>
 
-
+using namespace std;
+double pos = 0;
 void drawPolygon()
 {
     glBegin(GL_POLYGON);
@@ -16,27 +24,40 @@ void drawPolygon()
 }
 void display()
 {
-    //double time = glfwGetTime();
+    
+    int m = 0.01;
+    int g = 9.82;
+    int  k = 1;
+    double time = glfwGetTime();
+    
+    double speed = 19.1893 - 19.1893*exp(-0.5117*time);
+    
+    pos+=speed*time;
+   // cout << speed << "  ";
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glTranslatef(0, -0.01f, 0.0f);
     
+    glPushMatrix();
+    glScalef(0.1f, 0.1f, 0.1f);
+    glPushMatrix();
+    glTranslatef(0, -pos/100, 0.0f);
+    glPushMatrix();
     drawPolygon();
-    
-    glFlush();
+    glPopMatrix();
+    glPopMatrix();
+    glPopMatrix();
 }
-
-
 
 int main(void)
 {
     GLFWwindow* window;
+
     
     /* Initialize the library */
     if (!glfwInit())
         return -1;
     
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(1152, 720, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -47,11 +68,14 @@ int main(void)
     
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
+        
         display();
         glfwSwapBuffers(window);
         
