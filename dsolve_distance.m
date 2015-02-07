@@ -1,5 +1,5 @@
 syms s(t);
-airCoeff=1.7;
+airCoeff=1.28;
 dens=1.2041; %densitet
 area=0.0025; %tvärsnittsarea i m^2
 mass=0.005;
