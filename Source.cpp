@@ -1,15 +1,22 @@
 
 #define GLEW_STATIC
+
+#ifdef WIN32
 #include <GL/glew.h>
+#else
+// einar
+#endif
+
 #include <glfw3.h> // GLFW helper library
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include <ctime>
 #include <cstdlib>
 
+//BÖRJA KIKA PÅ BULLET! typ istället för calculateLeafRotation... /einis
 
 struct leaf{
 	glm::vec3 pos, speed;
