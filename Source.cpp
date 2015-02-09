@@ -48,6 +48,7 @@ void drawTriangle();
 void positionLog(float velo, float pos);
 //void addWind();
 
+using namespace std;
 int main(void)
 {
     // Build the broadphase
@@ -79,15 +80,13 @@ int main(void)
     
     btDefaultMotionState* fallMotionState =
     new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 3, 0)));
-    btScalar mass = 1;
+    btScalar mass = 0.1;
     btVector3 fallInertia(0, 0, 0);
     fallShape->calculateLocalInertia(mass, fallInertia);
     btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
     btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-    fallRigidBody->setLinearVelocity(btVector3(0,-5,0));
+    fallRigidBody->setLinearVelocity(btVector3(0,0,0));
     
-    //anvŠnd setDamping fšr luftmotstŒnd;
-    fallRigidBody->setDamping(0, 0);
     dynamicsWorld->addRigidBody(fallRigidBody);
     
     btScalar m[16];
@@ -121,6 +120,17 @@ int main(void)
 		float ratio;
 		int width, height;
 		float velocity = getVelocity(tid);
+        
+        //berŠkna luftmostŒnd
+        btVector3 velo = fallRigidBody->getLinearVelocity();
+        
+        double airCoeff = 1.28;
+        double dens = 1.2041;
+        double area = 0.0025;
+        double airRes = pow(velo.getY(), 2)*airCoeff*dens*area;
+        cout << airRes << " ";
+        
+        fallRigidBody->applyCentralImpulse( btVector3( 0.f, airRes, 0.f ) );
 
 		//float velo = dist / tid;
 		glfwGetFramebufferSize(window, &width, &height);
@@ -144,7 +154,7 @@ int main(void)
 		glScalef(0.2f, 0.2f, 0.2f);
         
 
-        dynamicsWorld->stepSimulation(1 / 100.f, 10);
+        dynamicsWorld->stepSimulation(1 / 100.f, 1000);
             
         btTransform trans;
         fallRigidBody->getMotionState()->getWorldTransform(trans);
