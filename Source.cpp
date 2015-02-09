@@ -15,6 +15,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <ctime>
 #include <cstdlib>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletDynamics/btBulletCollisionCommon.h>
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
 //B…RJA KIKA P BULLET! typ istŠllet fšr calculateLeafRotation... /einis
 
@@ -43,27 +47,75 @@ void drawTriangle();
 
 void positionLog(float velo, float pos);
 //void addWind();
+
 int main(void)
 {
+    // Build the broadphase
+    btBroadphaseInterface* broadphase = new btDbvtBroadphase();
+    
+    // Set up the collision configuration and dispatcher
+    btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    
+    // The actual physics solver
+    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+    
+    // The world.
+    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    
+    
+    btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
+    
+    btCollisionShape* fallShape = new btSphereShape(1);
+    
+    
+    btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+    btRigidBody::btRigidBodyConstructionInfo
+    groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+    btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+  //  dynamicsWorld->addRigidBody(groundRigidBody);
+    
+    
+    btDefaultMotionState* fallMotionState =
+    new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 3, 0)));
+    btScalar mass = 1;
+    btVector3 fallInertia(0, 0, 0);
+    fallShape->calculateLocalInertia(mass, fallInertia);
+    btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
+    btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
+    fallRigidBody->setLinearVelocity(btVector3(0,-5,0));
+    
+    //anvŠnd setDamping fšr luftmotstŒnd;
+    fallRigidBody->setDamping(0, 0);
+    dynamicsWorld->addRigidBody(fallRigidBody);
+    
+    btScalar m[16];
 
+    
+    
 	float radie = 0.93*0.2;
 	
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
-	if (!glfwInit())
+	
+    if (!glfwInit())
 		glfwTerminate();
 	window = glfwCreateWindow(1280, 960, "Simple example", NULL, NULL);
-	if (!window)
+	
+    if (!window)
 	{
 		glfwTerminate();
 
-	}
+	
+    }
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	glfwSetKeyCallback(window, key_callback);
 	bool firstLoop = true;
 	srand(time(NULL));
-	while (!glfwWindowShouldClose(window))
+	
+    while (!glfwWindowShouldClose(window))
 	{
 		float tid = (float)glfwGetTime();
 		float ratio;
@@ -80,32 +132,64 @@ int main(void)
 		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		if (firstLoop){ 
+		/*if (firstLoop){
 			firstLeaf.angle = (rand() % 100); 
 			setPosition();
-		}
+        }*/
 
 		int speedScale = 10000;
-		
+
 		glPushMatrix();
+        
 		glScalef(0.2f, 0.2f, 0.2f);
-		glTranslatef(0.f, firstLeaf.pos.y / speedScale, 0.f);
-		if (firstLoop){
+        
+
+        dynamicsWorld->stepSimulation(1 / 100.f, 10);
+            
+        btTransform trans;
+        fallRigidBody->getMotionState()->getWorldTransform(trans);
+        trans.getOpenGLMatrix(m);
+            
+        glMultMatrixf((GLfloat*)m);
+		//glTranslatef(0.f, firstLeaf.pos.y / speedScale, 0.f);
+	/*	if (firstLoop){
 			glRotatef(firstLeaf.angle, 1.f, 0.f, 1.f);
 		}
-		else{
+		else
+        {
 			calculateLeafRotation(tid);
-		}
-		glRotatef(getVelocity(tid)*radie*10*tid, 4.f, 4.f, 10.f);;
+		}*/
+		
+        //glRotatef(getVelocity(tid)*radie*10*tid, 4.f, 4.f, 10.f);;
 		drawTriangle();
 		glPopMatrix();
-		firstLeaf.pos.y += getPositionY(tid);
+	//	firstLeaf.pos.y += getPositionY(tid);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		firstLoop = false;
-	}
+    }
 	glfwDestroyWindow(window);
 	glfwTerminate();
+    
+    dynamicsWorld->removeRigidBody(fallRigidBody);
+    delete fallRigidBody->getMotionState();
+    delete fallRigidBody;
+    
+    dynamicsWorld->removeRigidBody(groundRigidBody);
+    delete groundRigidBody->getMotionState();
+    delete groundRigidBody;
+    
+    
+    delete fallShape;
+    
+    delete groundShape;
+    
+    
+    delete dynamicsWorld;
+    delete solver;
+    delete collisionConfiguration;
+    delete dispatcher;
+    delete broadphase;
 
 }
 
@@ -176,14 +260,10 @@ static void error_callback(int error, const char* description)
 }
 
 void calculateLeafRotation(float time){
-	
 
 	float vinklar[3] = { -45, 90, 225 };
 	//0.93 i radie
 	//vinklar -45, +90, +225
-
-
-
 }
 
 
