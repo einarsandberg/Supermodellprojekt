@@ -20,7 +20,6 @@
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
-//B…RJA KIKA P BULLET! typ istŠllet fšr calculateLeafRotation... /einis
 
 struct leaf{
 	glm::vec3 pos, speed;
@@ -44,8 +43,11 @@ float getPositionY(float tid);
 float getWind(float tid);
 
 void drawTriangle();
+double getAirResistance(btVector3 velocity);
 
 void positionLog(float velo, float pos);
+
+void initBullet();
 //void addWind();
 
 using namespace std;
@@ -86,10 +88,13 @@ int main(void)
     btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
     btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
     fallRigidBody->setLinearVelocity(btVector3(0,0,0));
+    int i;
+
+    
     
     dynamicsWorld->addRigidBody(fallRigidBody);
     
-    btScalar m[16];
+    btScalar transMatrix[16];
 
     
     
@@ -105,33 +110,34 @@ int main(void)
     if (!window)
 	{
 		glfwTerminate();
-
-	
     }
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	glfwSetKeyCallback(window, key_callback);
 	bool firstLoop = true;
-	srand(time(NULL));
-	
+    
     while (!glfwWindowShouldClose(window))
 	{
+        //nŒn ful vindgrej
+        for (i=dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
+        {
+            btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
+            btRigidBody* body = btRigidBody::upcast(obj);
+            if(!body->isStaticObject())
+                body->applyCentralForce(btVector3(0.1f,0.f,0.f));
+        }
 		float tid = (float)glfwGetTime();
 		float ratio;
 		int width, height;
-		float velocity = getVelocity(tid);
+		//float velocity = getVelocity(tid);
         
         //berŠkna luftmostŒnd
         btVector3 velo = fallRigidBody->getLinearVelocity();
+        double airRes=getAirResistance(velo);
         
-        double airCoeff = 1.28;
-        double dens = 1.2041;
-        double area = 0.0025;
-        double airRes = pow(velo.getY(), 2)*airCoeff*dens*area;
-        cout << airRes << " ";
+        fallRigidBody->applyCentralForce( btVector3( 0.f, airRes, 0.f ) );
+        //cout << airRes;
         
-        fallRigidBody->applyCentralImpulse( btVector3( 0.f, airRes, 0.f ) );
-
 		//float velo = dist / tid;
 		glfwGetFramebufferSize(window, &width, &height);
 		ratio = width / (float)height;
@@ -151,16 +157,16 @@ int main(void)
 
 		glPushMatrix();
         
-		glScalef(0.2f, 0.2f, 0.2f);
+		glScalef(0.05f, 0.05f, 0.05f);
         
 
         dynamicsWorld->stepSimulation(1 / 100.f, 1000);
             
         btTransform trans;
         fallRigidBody->getMotionState()->getWorldTransform(trans);
-        trans.getOpenGLMatrix(m);
+        trans.getOpenGLMatrix(transMatrix);
             
-        glMultMatrixf((GLfloat*)m);
+        glMultMatrixf((GLfloat*)transMatrix);
 		//glTranslatef(0.f, firstLeaf.pos.y / speedScale, 0.f);
 	/*	if (firstLoop){
 			glRotatef(firstLeaf.angle, 1.f, 0.f, 1.f);
@@ -203,6 +209,24 @@ int main(void)
 
 }
 
+void initBullet()
+{
+    
+}
+
+
+void bulletInit()
+{
+    
+}
+double getAirResistance(btVector3 velocity)
+{
+    double airCoeff = 1.28;
+    double dens = 1.2041;
+    double area = 0.0025;
+    double airRes = pow(velocity.getY(), 2)*airCoeff*dens*area;
+    return airRes;
+}
 
 float getVelocity(float tid){
 	float velocity;
