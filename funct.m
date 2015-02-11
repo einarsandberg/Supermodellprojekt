@@ -9,3 +9,7 @@ g=9.82;
 
 vdot=g-(0.5*airCoeff*dens*area*v^2)/mass;
 
+%%
+
+
+

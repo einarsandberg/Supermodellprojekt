@@ -9,3 +9,9 @@ Ds = diff(s)
 hej = dsolve(Ds==g-(0.5*airCoeff*dens*area*s)/mass, s(0)==0)
 
 %25.48584 - 25.48584*exp(-0.3853*t)
+
+%%
+clear all;
+
+
+
