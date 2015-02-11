@@ -1,11 +1,7 @@
 
 #define GLEW_STATIC
 
-#ifdef WIN32
-#include <GL/glew.h>
-#else
-// einar
-#endif
+
 
 #include <glfw3.h> // GLFW helper library
 #include <stdio.h>
@@ -19,26 +15,45 @@
 #include <BulletDynamics/btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-
-
-struct leaf{
-	glm::vec3 pos, speed;
-	float size, angle, weight;
-	bool life;
-};
-leaf firstLeaf;
+#include "Leaf.h"
+#include <vector>
 
 static void error_callback(int error, const char* description);
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void drawTriangle();
+
+
+//void drawTriangle();
 double getAirResistance(const btVector3& velocity);
 
 
 using namespace std;
 int main(void)
 {
+    double airCoeff = 1.28;
+    double dens = 1.2041;
+    double area = 0.0025;
+    double mass = 0.1;
+    double leafID;
+    
+    
+    
+
+    vector <Leaf> theLeaves;
+    for (int i = 0; i < 10; i++)
+    {
+        Leaf newLeaf(i);
+        newLeaf.setValues(mass,area,dens,airCoeff, (double)i); //i/100=the x translation
+        theLeaves.push_back(newLeaf);
+    }
+    for(std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
+    {
+        
+        
+    }
+    
+    
     // Build the broadphase
     btBroadphaseInterface* broadphase = new btDbvtBroadphase();
     
@@ -51,7 +66,7 @@ int main(void)
     
     // The world.
     btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-    dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    dynamicsWorld->setGravity(btVector3(0, -1, 0));
     
     
     btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 10, 0), 1);
@@ -68,22 +83,18 @@ int main(void)
     
     btDefaultMotionState* fallMotionState =
     new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 3, 0)));
-    btScalar mass = 0.1;
+
     btVector3 fallInertia(0, 0, 0);
     fallShape->calculateLocalInertia(mass, fallInertia);
     btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
     btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
     fallRigidBody->setLinearVelocity(btVector3(0,0,0));
     int i;
-
-    
     
     dynamicsWorld->addRigidBody(fallRigidBody);
     
     btScalar transMatrix[16];
 
-    
-    
 	float radie = 0.93*0.2;
 	
 	GLFWwindow* window;
@@ -104,14 +115,18 @@ int main(void)
     
     while (!glfwWindowShouldClose(window))
 	{
+        for (int k = 0; k < 10; k++)
+        {
+            
+        }
         //nŒn ful vindgrej
         for (i=dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
         {
             btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
             btRigidBody* body = btRigidBody::upcast(obj);
             if(!body->isStaticObject())
-                body->applyForce(btVector3(5.0f,0.f,0.f), btVector3(0.f,0.f,0.1f));
-                body->applyTorque(btVector3(.0f,0.0f,0.01f));
+                body->applyCentralForce(btVector3(0.1f,0.f,0.f));
+               // body->applyTorque(btVector3(.0f,0.0f,0.01f));
         }
 		float tid = (float)glfwGetTime();
 		float ratio;
@@ -120,7 +135,8 @@ int main(void)
         
         //berŠkna luftmostŒnd
         btVector3 velo = fallRigidBody->getLinearVelocity();
-        double airRes=getAirResistance(velo);
+        
+        double airRes=theLeaves[1].getAirResistance(velo, area, dens);
         
         fallRigidBody->applyCentralForce( btVector3( 0.f, airRes, 0.f ) );
         //cout << airRes;
@@ -136,13 +152,10 @@ int main(void)
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
-
-		int speedScale = 10000;
-
 		glPushMatrix();
         
 		glScalef(0.05f, 0.05f, 0.05f);
-        
+  
 
         dynamicsWorld->stepSimulation(1 / 100.f, 1000);
             
@@ -151,8 +164,15 @@ int main(void)
         trans.getOpenGLMatrix(transMatrix);
             
         glMultMatrixf((GLfloat*)transMatrix);
-
-		drawTriangle();
+        for(std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
+        {
+            glPushMatrix();
+            double pos = it->getXPosition();
+            //cout << pos;
+            glTranslatef(pos, pos, 0.f);
+            it->drawLeaf();
+        }
+       //myLeaf.drawLeaf();
 		glPopMatrix();
 	
 		glfwSwapBuffers(window);
@@ -192,7 +212,7 @@ double getAirResistance(const btVector3& velocity)
     double airRes = pow(velocity.getY(), 2)*airCoeff*dens*area;
     return airRes;
 }
-
+/*
 void drawTriangle(){
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_TRIANGLES);
@@ -204,7 +224,7 @@ void drawTriangle(){
 	glVertex3f(0.f, 1.0f, 0.f);
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
-}
+}*/
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
