@@ -1,12 +1,12 @@
 
+
 #define GLEW_STATIC
-
-
 
 #include <glfw3.h> // GLFW helper library
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include <ctime>
@@ -22,10 +22,10 @@ static void error_callback(int error, const char* description);
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-
-
-//void drawTriangle();
 double getAirResistance(const btVector3& velocity);
+float getFloating(float time);
+double getAirResistance(const btVector3& velocity);
+float getScalingConst();
 
 
 using namespace std;
@@ -36,9 +36,6 @@ int main(void)
     double area = 0.0025;
     double mass = 0.1;
     double leafID;
-    
-    
-    
 
     vector <Leaf> theLeaves;
     for (int i = 0; i < 10; i++)
@@ -52,7 +49,6 @@ int main(void)
         
         
     }
-    
     
     // Build the broadphase
     btBroadphaseInterface* broadphase = new btDbvtBroadphase();
@@ -73,13 +69,11 @@ int main(void)
     
     btCollisionShape* fallShape = new btSphereShape(1);
     
-    
     btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -20, 0)));
     btRigidBody::btRigidBodyConstructionInfo
     groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
     btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
     dynamicsWorld->addRigidBody(groundRigidBody);
-    
     
     btDefaultMotionState* fallMotionState =
     new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 3, 0)));
@@ -101,34 +95,34 @@ int main(void)
 	glfwSetErrorCallback(error_callback);
 	
     if (!glfwInit())
+    {
 		glfwTerminate();
-	window = glfwCreateWindow(1280, 960, "Simple example", NULL, NULL);
-	
+    }
+        window = glfwCreateWindow(1280, 960, "Simple example", NULL, NULL);
+    
+    
     if (!window)
 	{
 		glfwTerminate();
     }
+    
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	glfwSetKeyCallback(window, key_callback);
-	bool firstLoop = true;
     
     while (!glfwWindowShouldClose(window))
 	{
-        for (int k = 0; k < 10; k++)
-        {
-            
-        }
+
         //nŒn ful vindgrej
         for (i=dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
         {
             btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
             btRigidBody* body = btRigidBody::upcast(obj);
             if(!body->isStaticObject())
-                body->applyCentralForce(btVector3(0.1f,0.f,0.f));
-               // body->applyTorque(btVector3(.0f,0.0f,0.01f));
+               // body->applyCentralForce(btVector3(getFloating(time), 0.0f, 0.0f));
+               body->applyTorque(btVector3(0.f, 0.0f, 0.0f));
         }
-		float tid = (float)glfwGetTime();
+		
 		float ratio;
 		int width, height;
 		//float velocity = getVelocity(tid);
@@ -139,9 +133,7 @@ int main(void)
         double airRes=theLeaves[1].getAirResistance(velo, area, dens);
         
         fallRigidBody->applyCentralForce( btVector3( 0.f, airRes, 0.f ) );
-        //cout << airRes;
-        
-		//float velo = dist / tid;
+
 		glfwGetFramebufferSize(window, &width, &height);
 		ratio = width / (float)height;
 		glViewport(0, 0, width, height);
@@ -151,13 +143,13 @@ int main(void)
 		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-
+        
 		glPushMatrix();
         
-		glScalef(0.05f, 0.05f, 0.05f);
+		glScalef(0.005f, 0.005f, 0.005f);
   
 
-        dynamicsWorld->stepSimulation(1 / 100.f, 1000);
+        dynamicsWorld->stepSimulation(1 / 100.f, 100000);
             
         btTransform trans;
         fallRigidBody->getMotionState()->getWorldTransform(trans);
@@ -177,9 +169,9 @@ int main(void)
 	
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		firstLoop = false;
+		
     }
-	glfwDestroyWindow(window);
+    glfwDestroyWindow(window);
 	glfwTerminate();
     
     dynamicsWorld->removeRigidBody(fallRigidBody);
@@ -201,30 +193,8 @@ int main(void)
     delete collisionConfiguration;
     delete dispatcher;
     delete broadphase;
-
+    
 }
-
-double getAirResistance(const btVector3& velocity)
-{
-    double airCoeff = 1.28;
-    double dens = 1.2041;
-    double area = 0.0025;
-    double airRes = pow(velocity.getY(), 2)*airCoeff*dens*area;
-    return airRes;
-}
-/*
-void drawTriangle(){
-	glEnable(GL_TEXTURE_2D);
-	glBegin(GL_TRIANGLES);
-	glColor3f(0.f, 1.f, 0.f);
-	glVertex3f(-0.6f, -0.4f, 0.f);
-	glColor3f(0.f, 1.f, 0.f);
-	glVertex3f(0.6f, -0.4f, 0.f);
-	glColor3f(0.f, 1.f, 0.f);
-	glVertex3f(0.f, 1.0f, 0.f);
-	glEnd();
-	glDisable(GL_TEXTURE_2D);
-}*/
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -236,3 +206,22 @@ static void error_callback(int error, const char* description)
 {
 	fputs(description, stderr);
 }
+
+float getScalingConst()
+{
+	double dens = 1.2041;
+	double length = 0.005;
+	float width = 0.005;
+	float mass = 0.005;
+	float farokskonstant = sqrt(mass / (dens*pow(length, 2)*width));
+    return farokskonstant;
+}
+
+float getFloating(float time)
+{
+	float floating = -sinf(time)*cosf(time) + abs(cosf(time))*cosf(time + 3) - 10*abs(sinf(time + 3))*sinf(time / 2 + 3.14 / 2);
+	std::cout << floating << '\n';
+	return floating/(100);
+
+}
+
