@@ -57,7 +57,7 @@ int main(void)
 
 	// The world.
 	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0, -1, 0));
+	dynamicsWorld->setGravity(btVector3(0, -9.82, 0));
 
 
 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 0, 0), 1);
@@ -81,11 +81,7 @@ int main(void)
 
 	btScalar transMatrix[16];
 
-	//float radie = 0.93*0.2;
-
-	//setValues
-
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 70; i++)
 	{
 		//std::cout << theLeaves[i].getFlutter(0.f);
 		float randNumbX = rand() % 10000 / 100 - 50;
@@ -142,8 +138,6 @@ int main(void)
         double airRes = 0;
         btTransform trans;
         
-		//fallRigidBody->applyCentralForce(btVector3(0.f, airRes, 0.f));
-        
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float)height;
         glViewport(0, 0, width, height);
@@ -165,7 +159,7 @@ int main(void)
             glMultMatrixf((GLfloat*)transMatrix);
             
         }
-		
+        
 		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
 		{
 			glPushMatrix();
