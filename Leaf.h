@@ -33,7 +33,8 @@ public:
 	btVector3 getFlutter(const btVector3& angularPos);
 	btVector3 getRotation();
 	//float getScalingConst();
-	void setValues(double m, double a, double dens, double air, const btVector3& pos, const btVector3& flutter, btRigidBody* leafBody, const btVector3& angularVel);
+	void setValues(double m, double a, double dens, double air, const btVector3& pos,
+                   const btVector3& flutter, const btVector3& angularVel);
 	void drawLeaf();
 	btVector3 getPosition();
 	double getAirResistance(const btVector3& velocity, double a, double d);
@@ -45,5 +46,10 @@ protected:
 	btVector3 position, angularVelocity;
 	int leafID;
 	bool life;
+    //bullet shitb
 	btRigidBody* leafBody;
+    btCollisionShape* fallShape;
+    btDefaultMotionState* fallMotionState;
+    btVector3 fallInertia;
+    btQuaternion rotation;
 };

@@ -14,6 +14,7 @@
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
 #include "Leaf.h"
+#include "World.h"
 #include <vector>
 
 static void error_callback(int error, const char* description);
@@ -38,47 +39,12 @@ int main(void)
 	srand(time(NULL));
 	btVector3 vind(0.0f, 1.0f, 0.0f);
 
-	//initiera alla bullet funktioner
-
-	// Build the broadphase
-	btBroadphaseInterface* broadphase = new btDbvtBroadphase();
-
-	// Set up the collision configuration and dispatcher
-	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
-	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
-
-	// The actual physics solver
-	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
-
-	// The world.
-	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0, -9.82, 0));
-
-
-	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 0, 0), 1);
-
-	btCollisionShape* fallShape = new btSphereShape(1);
-
-	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -20, 0)));
-	btRigidBody::btRigidBodyConstructionInfo
-		groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-	dynamicsWorld->addRigidBody(groundRigidBody);
-
-	btDefaultMotionState* fallMotionState =
-		new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 3, 0)));
-
-	btVector3 fallInertia(0, 0, 0);
-	fallShape->calculateLocalInertia(mass, fallInertia);
-	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
-	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+    World theWorld;
 
 	btScalar transMatrix[16];
 
 	for (int i = 0; i < 70; i++)
 	{
-		//std::cout << theLeaves[i].getFlutter(0.f);
 		float randNumbX = rand() % 10000 / 100 - 50;
 		float randNumbY = rand() % 10000 / 100 - 50;
 		float randNumbZ = rand() % 10000 / 100 - 50;
@@ -88,12 +54,12 @@ int main(void)
 		//flu = 0;
 		
 		
-		newLeaf.setValues(mass, area, dens, airCoeff, poss, flu, fallRigidBody,angularVel); //i/100=the x translation
-		dynamicsWorld->addRigidBody(newLeaf.getFallingBody());
+		newLeaf.setValues(mass, area, dens, airCoeff, poss, flu, angularVel); //i/100=the x translation
+		theWorld.getDynamicsWorld()->addRigidBody(newLeaf.getFallingBody());
 		theLeaves.push_back(newLeaf);
 	}
 	//skapa fönster o lite sånt
-
+    
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
 
@@ -130,15 +96,11 @@ int main(void)
 		int width, height;
 		//float velocity = getVelocity(tid);
 
-		//berŠkna luftmostŒnd
-
-		dynamicsWorld->stepSimulation(1 / 100.f, 100000);
+		theWorld.getDynamicsWorld()->stepSimulation(1 / 100.f, 100000);
 		btVector3 velo;
 		double airRes = 0;
 		btTransform trans;
 		btTransform trans_local;
-
-		
 
 		glfwGetFramebufferSize(window, &width, &height);
 		ratio = width / (float)height;
@@ -152,11 +114,9 @@ int main(void)
 		//
 
 		glPushMatrix();
-		fallRigidBody->applyCentralForce(vind);
 			
 			for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
-			{ 
-
+			{
 				glPushMatrix();
 					
 					glScalef(0.01f, 0.01f, 0.01f);
@@ -186,7 +146,6 @@ int main(void)
 				glPopMatrix();
 			}
 		glPopMatrix();
-		//myLeaf.drawLeaf();
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -196,15 +155,8 @@ int main(void)
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
-	dynamicsWorld->removeRigidBody(fallRigidBody);
-	delete fallRigidBody->getMotionState();
-	delete fallRigidBody;
-
-	dynamicsWorld->removeRigidBody(groundRigidBody);
-	delete groundRigidBody->getMotionState();
-	delete groundRigidBody;
-
-
+	//theWorld.getDynamicsWorld()->removeRigidBody(fallRigidBody);
+    
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

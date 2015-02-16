@@ -14,17 +14,14 @@
 class World
 {
     public:
-        World(int leafID);
+        World();
         ~World();
         void initWorld();
+        btDiscreteDynamicsWorld* getDynamicsWorld();
     private:
         btBroadphaseInterface* broadphase;
         btDefaultCollisionConfiguration* collisionConfiguration;
         btCollisionDispatcher* dispatcher;
         btSequentialImpulseConstraintSolver* solver;
-    
-    
-    
-    
-    
+        btDiscreteDynamicsWorld* dynamicsWorld;
 };
