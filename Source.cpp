@@ -23,7 +23,7 @@ static void error_callback(int error, const char* description);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 double getAirResistance(const btVector3& velocity);
-float getFloating(float time);
+float getFlutter(float time);
 double getAirResistance(const btVector3& velocity);
 float getScalingConst();
 
@@ -112,14 +112,15 @@ int main(void)
     
     while (!glfwWindowShouldClose(window))
 	{
-
+        float time = glfwGetTime();
         //nŒn ful vindgrej
         for (i=dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
         {
             btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
             btRigidBody* body = btRigidBody::upcast(obj);
+           
             if(!body->isStaticObject())
-               // body->applyCentralForce(btVector3(getFloating(time), 0.0f, 0.0f));
+                body->applyCentralForce(btVector3(getFlutter(time), 0.0f, 0.0f));
                body->applyTorque(btVector3(0.f, 0.0f, 0.0f));
         }
 		
@@ -146,7 +147,7 @@ int main(void)
         
 		glPushMatrix();
         
-		glScalef(0.005f, 0.005f, 0.005f);
+		glScalef(0.05f, 0.05f, 0.05f);
   
 
         dynamicsWorld->stepSimulation(1 / 100.f, 100000);
@@ -217,11 +218,11 @@ float getScalingConst()
     return farokskonstant;
 }
 
-float getFloating(float time)
+float getFlutter(float time)
 {
-	float floating = -sinf(time)*cosf(time) + abs(cosf(time))*cosf(time + 3) - 10*abs(sinf(time + 3))*sinf(time / 2 + 3.14 / 2);
-	std::cout << floating << '\n';
-	return floating/(100);
+	float flutter = -sinf(time)*cosf(time) + abs(cosf(time))*cosf(time + 3) - 10*abs(sinf(time + 3))*sinf(time / 2 + 3.14 / 2);
+	std::cout << flutter << '\n';
+	return flutter/(100);
 
 }
 
