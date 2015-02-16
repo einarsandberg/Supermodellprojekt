@@ -1,15 +1,19 @@
-#include "stdafx.h"
-#include "glew.h"
+//#include "stdafx.h"
+//#include "glew.h"
 #include <glfw3.h> // GLFW helper library
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
-#include "glm/glm/glm.hpp"
-#include "glm/glm/gtc/matrix_transform.hpp"
+#include "glm/glm.hpp"
+//#include "glm/glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+//#include "glm/glm/gtc/matrix_transform.hpp"
 #include <ctime>
 #include <cstdlib>
-#include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
+//#include <btBulletDynamicsCommon.h>
+//#include <btBulletCollisionCommon.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include "Leaf.h"
@@ -33,7 +37,6 @@ int main(void)
 	double dens = 1.2041;
 	double area = 0.0025;
 	double mass = 0.1;
-	double leafID;
 	btVector3 poss(0, 0, 0);
 	float  flu = 0;
 	vector <Leaf> theLeaves;
@@ -54,7 +57,7 @@ int main(void)
 
 	// The world.
 	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	dynamicsWorld->setGravity(btVector3(0, -1, 0));
 
 
 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 0, 0), 1);
@@ -75,19 +78,12 @@ int main(void)
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
 	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
 	fallRigidBody->setLinearVelocity(btVector3(0, 0, 0));
-	int i;
-
-	dynamicsWorld->addRigidBody(fallRigidBody);
 
 	btScalar transMatrix[16];
 
 	//float radie = 0.93*0.2;
 
 	//setValues
-
-	
-	//float time = (float)glfwGetTime();
-	//
 
 	for (int i = 0; i < 20; i++)
 	{
@@ -98,16 +94,10 @@ int main(void)
 		Leaf newLeaf(i);
 		poss = btVector3(randNumbX, randNumbY, randNumbZ);
 		//flu = 0;
-		newLeaf.setValues(mass, area, dens, airCoeff, poss, flu); //i/100=the x translation
+		newLeaf.setValues(mass, area, dens, airCoeff, poss, flu, fallRigidBody); //i/100=the x translation
+        dynamicsWorld->addRigidBody(newLeaf.getFallingBody());
 		theLeaves.push_back(newLeaf);
 	}
-
-	for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
-	{
-		//?? vad ska hända här?
-
-	}
-	
 	//skapa fönster o lite sånt
 
 	GLFWwindow* window;
@@ -118,8 +108,6 @@ int main(void)
 		glfwTerminate();
 	}
 	window = glfwCreateWindow(1280, 960, "Simple example", NULL, NULL);
-
-
 	if (!window)
 	{
 		glfwTerminate();
@@ -129,53 +117,55 @@ int main(void)
 	glfwSwapInterval(1);
 	glfwSetKeyCallback(window, key_callback);
 
-	//renteringsloop
+	//renderingsloop
 	while (!glfwWindowShouldClose(window))
 	{
 
 		//nŒn ful vindgrej
 		float time = (float)glfwGetTime();
-		for (i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+/*		for (i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
 		{
 			btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
 			btRigidBody* body = btRigidBody::upcast(obj);
 			if (!body->isStaticObject())
 				body->applyCentralForce(btVector3(0.f, 0.0f, 0.0f));
 				body->applyTorque(btVector3(0.f, 0.0f, 0.0f));
-		}
-
+		}*/
+        
 		float ratio;
 		int width, height;
 		//float velocity = getVelocity(tid);
 
 		//berŠkna luftmostŒnd
-		btVector3 velo = fallRigidBody->getLinearVelocity();
-
-		double airRes = theLeaves[1].getAirResistance(velo, area, dens);
-
-		fallRigidBody->applyCentralForce(btVector3(0.f, airRes, 0.f));
-
-		glfwGetFramebufferSize(window, &width, &height);
-		ratio = width / (float)height;
-		glViewport(0, 0, width, height);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-
-		glPushMatrix();
-
-		glScalef(0.01f, 0.01f, 0.01f);
-
-		dynamicsWorld->stepSimulation(1 / 100.f, 100000);
-
-		btTransform trans;
-		fallRigidBody->getMotionState()->getWorldTransform(trans);
-		trans.getOpenGLMatrix(transMatrix);
-
-		glMultMatrixf((GLfloat*)transMatrix);
+        dynamicsWorld->stepSimulation(1 / 100.f, 100000);
+        btVector3 velo;
+        double airRes = 0;
+        btTransform trans;
+        
+		//fallRigidBody->applyCentralForce(btVector3(0.f, airRes, 0.f));
+        
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float)height;
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
+        {
+            velo = it->getFallingBody()->getLinearVelocity();
+            airRes = it->getAirResistance(velo, area, dens);
+            it->getFallingBody()->applyCentralForce(btVector3(0.f, airRes,0.f));
+            it->getFallingBody()->getMotionState()->getWorldTransform(trans);
+            trans.getOpenGLMatrix(transMatrix);
+            glPushMatrix();
+            glScalef(0.01f, 0.01f, 0.01f);
+            glMultMatrixf((GLfloat*)transMatrix);
+            
+        }
+		
 		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
 		{
 			glPushMatrix();
@@ -191,7 +181,6 @@ int main(void)
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
 	}
 
 	//destruktorer

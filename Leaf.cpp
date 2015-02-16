@@ -9,16 +9,19 @@
 /* vertex_array */
 
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
-#include "glew.h"
-#include "glm/glm/glm.hpp"
+//#include "glew.h"
+#include "glm/glm.hpp"
+//#include "glm/glm/glm.hpp"
 #include "Leaf.h"
 #include <math.h>
 #include <time.h>
 #include "glfw3.h" // GLFW helper library
-#include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletCollision/btBulletCollisionCommon.h>
+//#include <btBulletDynamicsCommon.h>
+//#include <btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <iostream>
@@ -28,6 +31,7 @@ const int antalPos = 3;
 
 Leaf::Leaf(int id)
 {
+    
     leafID = id;
 }
 
@@ -40,7 +44,7 @@ btVector3 Leaf::getPosition()
     return position;
 }
 
-void Leaf::setValues(double m, double a, double dens, double air, const btVector3& pos, float flu)
+void Leaf::setValues(double m, double a, double dens, double air, const btVector3& pos, float flu, btRigidBody* theBody)
 {
     mass = m;
     area = a;
@@ -48,6 +52,7 @@ void Leaf::setValues(double m, double a, double dens, double air, const btVector
     airCoeff=air;
     position = pos;
 	flutter = flu;
+    leafBody = theBody;
 }
 
 
@@ -80,7 +85,7 @@ void Leaf::drawLeaf()
             1.0, -1.0, 0.0
         };
 
-	glewInit();
+	//glewInit();
 
 
     //Create a new VBO and use the variable id to store the VBO id
@@ -124,6 +129,10 @@ double Leaf::getAirResistance(const btVector3& velocity, double a, double d)
 {
     double airRes=pow(velocity.getY(),2)*a*d;
     return airRes;
+}
+btRigidBody* Leaf::getFallingBody()
+{
+    return leafBody;
 }
 
 double Leaf::getRotation(){ return 0; };
