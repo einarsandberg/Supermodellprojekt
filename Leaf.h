@@ -6,15 +6,17 @@
 //  Copyright (c) 2015 Einar Sandberg. All rights reserved.
 //
 
-
-#include "glm/glm.hpp"
+#include "glfw3.h"// GLFW helper library
+#include "glm/glm/glm.hpp"
 #include <stdio.h>
+#include "glew.h"
 #include <math.h>
-#include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletDynamics/btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-#include <glfw3.h> // GLFW helper library
+
+
 
 class Leaf
 {
@@ -25,13 +27,19 @@ public:
     void getAirCoeff();
     void getAirRes();
     void getDensity();
-    void setValues(double m, double a, double dens, double air, double position);
+	float setFlutter(float time);
+	float getFlutter(float time);
+	double getRotation();
+	//float getScalingConst();
+    void setValues(double m, double a, double dens, double air, const btVector3& pos, float flutter);
     void drawLeaf();
-    double getXPosition();
-    double getAirResistance(const btVector3& velocity, double a, double d);
+    btVector3 getPosition();
+    double getAirResistance(const btVector3& velocity, double a,double d);
 protected:
     glm::vec3 velocity;
-    double mass, angle, airCoeff, density, area, position;
+	double mass, angle, airCoeff, density, area;
+	float flutter;
+	btVector3 position;
     int leafID;
     bool life;
 };
