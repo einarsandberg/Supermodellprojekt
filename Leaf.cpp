@@ -22,10 +22,17 @@
 
 const int antalPos = 3;
 
-Leaf::Leaf(int id)
+Leaf::Leaf(double m, double a, double dens, double air,
+           const btVector3& pos, const btVector3& flu,const btVector3& angularVel)
 {
+    mass = m;
+    area = a;
+    density = dens;
+    airCoeff = air;
+    position = pos;
+    flutter = flu;
+    angularVelocity = angularVel;
     
-	leafID = id;
     rotation=btQuaternion(0,0,0,1);
     fallShape = new btSphereShape(1);
     fallMotionState =
@@ -36,30 +43,20 @@ Leaf::Leaf(int id)
     leafBody = new btRigidBody(fallRigidBodyCI);
     leafBody->setLinearVelocity(btVector3(0, 0, 0));
     
+    
 }
 
 Leaf::~Leaf()
-{
-   // delete leafBody->getMotionState();
-   // delete leafBody;
+{/*
+    delete leafBody->getMotionState();
+    //delete leafBody;
+    delete fallShape;*/
+    
 }
 btVector3 Leaf::getPosition()
 {
 	return position;
 }
-
-void Leaf::setValues(double m, double a, double dens, double air, 
-	const btVector3& pos, const btVector3& flu,const btVector3& angularVel)
-{
-	mass = m;
-	area = a;
-	density = dens;
-	airCoeff = air;
-	position = pos;
-	flutter = flu;
-	angularVelocity = angularVel;
-}
-
 
 btVector3 Leaf::getFlutter(const btVector3& angularPos)
 {
@@ -126,7 +123,7 @@ double Leaf::getAirResistance(const btVector3& velocity, double a, double d)
 	double airRes = pow(velocity.getY(), 2)*a*d;
 	return airRes;
 }
-btRigidBody* Leaf::getFallingBody()
+btRigidBody* Leaf::getBody()
 {
 	return leafBody;
 }
@@ -134,4 +131,4 @@ btRigidBody* Leaf::getFallingBody()
 btVector3 Leaf::getRotation()
 {
 	return angularVelocity;
-};
+}

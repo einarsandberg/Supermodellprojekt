@@ -44,9 +44,11 @@ btDiscreteDynamicsWorld* World::getDynamicsWorld()
 }
 World::~World()
 {
-   /* delete solver;
-    delete collisionConfiguration;
+    delete dynamicsWorld;
+    delete solver;
     delete dispatcher;
+    delete collisionConfiguration;
+  
     delete broadphase;
-    delete dynamicsWorld;*/
+    
 }

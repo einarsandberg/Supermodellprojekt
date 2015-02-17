@@ -26,38 +26,36 @@ float getScalingConst();
 using namespace std;
 int main(void)
 {
-	//sätter alla variabler
+	
 	double airCoeff = 1.28;
 	double dens = 1.2041;
 	double area = 0.0025;
 	double mass = 0.1;
 	btVector3 pos(0, 0, 0);
-	btVector3 angularVel(0, 0, 0);
+	btVector3 angularVel(0.f, 0.f, 0.f);
 	btVector3  flu(0.0f,0.0f,0.0f);
 	vector <Leaf> theLeaves;
 	srand(time(NULL));
 	btVector3 wind(0.0f, 1.0f, 0.0f);
 
     World theWorld;
-
 	btScalar transMatrix[16];
-
-	for (int i = 0; i < 70; i++)
+    btRigidBody* body;
+	for (int i = 0; i < 20; i++)
 	{
 		float randNumbX = rand() % 10000 / 100 - 50;
 		float randNumbY = rand() % 10000 / 100 - 50;
 		float randNumbZ = rand() % 10000 / 100 - 50;
-		Leaf newLeaf(i);
+        
+        Leaf newLeaf(mass, area, dens, airCoeff, pos, flu, angularVel);
 		pos = btVector3(randNumbX, randNumbY, randNumbZ);
 		angularVel = btVector3(randNumbX, randNumbY, randNumbZ);
-		//flu = 0;
 		
+        theLeaves.push_back(newLeaf);
+    
+        theWorld.getDynamicsWorld()->addRigidBody(newLeaf.getBody());
 		
-		newLeaf.setValues(mass, area, dens, airCoeff, pos, flu, angularVel); //i/100=the x translation
-		theWorld.getDynamicsWorld()->addRigidBody(newLeaf.getFallingBody());
-		theLeaves.push_back(newLeaf);
 	}
-	//skapa fönster o lite sånt
     
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
@@ -120,18 +118,18 @@ int main(void)
 					
 					glScalef(0.01f, 0.01f, 0.01f);
 					btVector3 pos = it->getPosition();
-					cout << *it->getFlutter(it->getRotation()) << '\n';
+					//cout << *it->getFlutter(it->getRotation()) << '\n';
             
 					glTranslatef(pos.getX() + it->getFlutter(it->getRotation()).getX(), pos.getY() + it->getFlutter(it->getRotation()).getY(), pos.getZ());
 					
-					it->getFallingBody()->setAngularVelocity(it->getRotation());
+					it->getBody()->setAngularVelocity(it->getRotation());
 		
-					velo = it->getFallingBody()->getLinearVelocity();
+					velo = it->getBody()->getLinearVelocity();
 
 					airRes = it->getAirResistance(velo, area, dens);
 					
-					it->getFallingBody()->applyCentralForce(btVector3(0.f, airRes, 0.f));
-					it->getFallingBody()->getMotionState()->getWorldTransform(trans);
+					it->getBody()->applyCentralForce(btVector3(0.f, airRes, 0.f));
+					it->getBody()->getMotionState()->getWorldTransform(trans);
 
 					trans.getOpenGLMatrix(transMatrix);
 					glMultMatrixf((GLfloat*)transMatrix);
@@ -148,8 +146,11 @@ int main(void)
 	//destruktorer
 	glfwDestroyWindow(window);
 	glfwTerminate();
-
-	//theWorld.getDynamicsWorld()->removeRigidBody(fallRigidBody);
+    for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
+    {
+        theWorld.getDynamicsWorld()->removeRigidBody(it->getBody());
+    }
+	
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
