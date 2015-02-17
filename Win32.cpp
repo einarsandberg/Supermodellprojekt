@@ -23,7 +23,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 float getScalingConst();
 
-
 using namespace std;
 int main(void)
 {
@@ -32,12 +31,12 @@ int main(void)
 	double dens = 1.2041;
 	double area = 0.0025;
 	double mass = 0.1;
-	btVector3 poss(0, 0, 0);
+	btVector3 pos(0, 0, 0);
 	btVector3 angularVel(0, 0, 0);
 	btVector3  flu(0.0f,0.0f,0.0f);
 	vector <Leaf> theLeaves;
 	srand(time(NULL));
-	btVector3 vind(0.0f, 1.0f, 0.0f);
+	btVector3 wind(0.0f, 1.0f, 0.0f);
 
     World theWorld;
 
@@ -49,12 +48,12 @@ int main(void)
 		float randNumbY = rand() % 10000 / 100 - 50;
 		float randNumbZ = rand() % 10000 / 100 - 50;
 		Leaf newLeaf(i);
-		poss = btVector3(randNumbX, randNumbY, randNumbZ);
+		pos = btVector3(randNumbX, randNumbY, randNumbZ);
 		angularVel = btVector3(randNumbX, randNumbY, randNumbZ);
 		//flu = 0;
 		
 		
-		newLeaf.setValues(mass, area, dens, airCoeff, poss, flu, angularVel); //i/100=the x translation
+		newLeaf.setValues(mass, area, dens, airCoeff, pos, flu, angularVel); //i/100=the x translation
 		theWorld.getDynamicsWorld()->addRigidBody(newLeaf.getFallingBody());
 		theLeaves.push_back(newLeaf);
 	}
@@ -111,7 +110,7 @@ int main(void)
 		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		//
+		
 
 		glPushMatrix();
 			
@@ -120,11 +119,9 @@ int main(void)
 				glPushMatrix();
 					
 					glScalef(0.01f, 0.01f, 0.01f);
-
 					btVector3 pos = it->getPosition();
-					
-					std::cout << *it->getFlutter(it->getRotation()) << '\n';
-					
+					cout << *it->getFlutter(it->getRotation()) << '\n';
+            
 					glTranslatef(pos.getX() + it->getFlutter(it->getRotation()).getX(), pos.getY() + it->getFlutter(it->getRotation()).getY(), pos.getZ());
 					
 					it->getFallingBody()->setAngularVelocity(it->getRotation());
@@ -134,13 +131,10 @@ int main(void)
 					airRes = it->getAirResistance(velo, area, dens);
 					
 					it->getFallingBody()->applyCentralForce(btVector3(0.f, airRes, 0.f));
-				
 					it->getFallingBody()->getMotionState()->getWorldTransform(trans);
 
 					trans.getOpenGLMatrix(transMatrix);
-
 					glMultMatrixf((GLfloat*)transMatrix);
-				
 					it->drawLeaf();
 				
 				glPopMatrix();
@@ -156,7 +150,6 @@ int main(void)
 	glfwTerminate();
 
 	//theWorld.getDynamicsWorld()->removeRigidBody(fallRigidBody);
-    
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -169,7 +162,3 @@ static void error_callback(int error, const char* description)
 {
 	fputs(description, stderr);
 }
-
-
-
-
