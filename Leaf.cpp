@@ -46,13 +46,14 @@ Leaf::Leaf(double m, double a, double dens, double air,
     
 }
 
-Leaf::~Leaf()
-{/*
+/*Leaf::~Leaf()
+{
     delete leafBody->getMotionState();
+    delete fallShape;
     //delete leafBody;
-    delete fallShape;*/
     
-}
+    
+}*/
 btVector3 Leaf::getPosition()
 {
 	return position;
@@ -131,4 +132,8 @@ btRigidBody* Leaf::getBody()
 btVector3 Leaf::getRotation()
 {
 	return angularVelocity;
+}
+double Leaf::getMass()
+{
+    return mass;
 }

@@ -24,16 +24,12 @@ class Leaf
 public:
     Leaf(double m, double a, double dens, double air,
             const btVector3& pos, const btVector3& flu,const btVector3& angularVel);
-	~Leaf();
-	void getMass();
-	void getAirCoeff();
-	void getAirRes();
-	void getDensity();
+	//~Leaf();
 	btRigidBody* getBody();
 	float setFlutter(float time);
 	btVector3 getFlutter(const btVector3& angularPos);
 	btVector3 getRotation();
-
+    double getMass();
 	void drawLeaf();
 	btVector3 getPosition();
 	double getAirResistance(const btVector3& velocity, double a, double d);

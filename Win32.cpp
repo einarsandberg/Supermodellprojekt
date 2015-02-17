@@ -41,22 +41,22 @@ int main(void)
     World theWorld;
 	btScalar transMatrix[16];
     btRigidBody* body;
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		float randNumbX = rand() % 10000 / 100 - 50;
 		float randNumbY = rand() % 10000 / 100 - 50;
 		float randNumbZ = rand() % 10000 / 100 - 50;
-        
+        pos = btVector3(randNumbX, randNumbY, randNumbZ);
+        angularVel = btVector3(randNumbX, randNumbY, randNumbZ);
         Leaf newLeaf(mass, area, dens, airCoeff, pos, flu, angularVel);
-		pos = btVector3(randNumbX, randNumbY, randNumbZ);
-		angularVel = btVector3(randNumbX, randNumbY, randNumbZ);
+
 		
         theLeaves.push_back(newLeaf);
     
         theWorld.getDynamicsWorld()->addRigidBody(newLeaf.getBody());
 		
 	}
-    
+   // cout << theLeaves[].getMass();
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
 
@@ -146,10 +146,10 @@ int main(void)
 	//destruktorer
 	glfwDestroyWindow(window);
 	glfwTerminate();
-    for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
+    /*for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
     {
         theWorld.getDynamicsWorld()->removeRigidBody(it->getBody());
-    }
+    }*/
 	
 }
 

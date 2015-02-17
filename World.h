@@ -15,7 +15,7 @@ class World
 {
     public:
         World();
-        ~World();
+       // ~World();
         void initWorld();
         btDiscreteDynamicsWorld* getDynamicsWorld();
     private:

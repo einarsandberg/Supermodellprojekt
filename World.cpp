@@ -42,7 +42,7 @@ btDiscreteDynamicsWorld* World::getDynamicsWorld()
 {
     return dynamicsWorld;
 }
-World::~World()
+/*World::~World()
 {
     delete dynamicsWorld;
     delete solver;
@@ -51,4 +51,4 @@ World::~World()
   
     delete broadphase;
     
-}
+}*/
