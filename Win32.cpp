@@ -8,8 +8,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <ctime>
 #include <cstdlib>
-#include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletCollision/btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 

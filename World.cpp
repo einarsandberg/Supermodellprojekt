@@ -12,8 +12,8 @@
 #include <math.h>
 #include <time.h>
 #include "glfw3.h" // GLFW helper library
-#include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletCollision/btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <iostream>

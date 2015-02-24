@@ -9,10 +9,17 @@ GLFWwindow* window;
 #include <iostream>
 #include <ctime>
 #include <SOIL.h>
+#include <vector>
+
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 #include "BulletDynamics\Dynamics\btDynamicsWorld.h"
 #include "BulletCollision\Gimpact\btGImpactCollisionAlgorithm.h"
+
+
+#include "Leaf.h"
+#include "World.h"
+#include <vector>
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -62,8 +69,6 @@ int main()
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
-	
 
 
 	GLfloat vertices[] = {
@@ -122,6 +127,7 @@ int main()
 
 
 	};
+
 	// Create Vertex Array Object
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -184,8 +190,24 @@ int main()
 	glEnableVertexAttribArray(texAttrib);
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
 	// Compute the MVP matrix from keyboard and mouse input
+	
+	//sätter alla variabler
+	double airCoeff = 1.28;
+	double dens = 1.2041;
+	double area = 0.0025;
+	double mass = 0.1;
+	btVector3 poss(0, 0, 0);
+	btVector3 angularVel(0, 0, 0);
+	btVector3  flu(0.0f, 0.0f, 0.0f);
+	vector <Leaf> theLeaves;
+	srand(time(NULL));
+	btVector3 vind(0.0f, 1.0f, 0.0f);
 
-	for (int i = 0; i < 70; i++)
+	World theWorld;
+	
+	btScalar transMatrix[16];
+	
+	for (int i = 0; i < 10; i++)
 	{
 		float randNumbX = rand() % 10000 / 100 - 50;
 		float randNumbY = rand() % 10000 / 100 - 50;
@@ -195,7 +217,7 @@ int main()
 		angularVel = btVector3(randNumbX, randNumbY, randNumbZ);
 		//flu = 0;
 
-
+		
 		newLeaf.setValues(mass, area, dens, airCoeff, poss, flu, angularVel); //i/100=the x translation
 		theWorld.getDynamicsWorld()->addRigidBody(newLeaf.getFallingBody());
 		theLeaves.push_back(newLeaf);
@@ -214,7 +236,7 @@ int main()
 		//glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-		
+		float time = (float)glfwGetTime();
 
 		computeMatricesFromInputs();
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
@@ -241,6 +263,48 @@ int main()
 			glm::vec3(0.0f, 0.0f, 1.0f)
 			);
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+
+
+		theWorld.getDynamicsWorld()->stepSimulation(1 / 100.f, 100000);
+		btVector3 velo;
+		double airRes = 0;
+		btTransform trans;
+		btTransform trans_local;
+
+		glPushMatrix();
+
+		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
+		{
+			glPushMatrix();
+
+			glScalef(0.01f, 0.01f, 0.01f);
+
+			btVector3 pos = it->getPosition();
+
+			std::cout << *it->getFlutter(it->getRotation()) << '\n';
+
+			glTranslatef(pos.getX() + it->getFlutter(it->getRotation()).getX(), pos.getY() + it->getFlutter(it->getRotation()).getY(), pos.getZ());
+
+			it->getFallingBody()->setAngularVelocity(it->getRotation());
+
+			velo = it->getFallingBody()->getLinearVelocity();
+
+			airRes = it->getAirResistance(velo, area, dens);
+
+			it->getFallingBody()->applyCentralForce(btVector3(0.f, airRes, 0.f));
+
+			it->getFallingBody()->getMotionState()->getWorldTransform(trans);
+
+			trans.getOpenGLMatrix(transMatrix);
+
+			glMultMatrixf((GLfloat*)transMatrix);
+
+			it->drawLeaf();
+
+			glPopMatrix();
+		}
+		glPopMatrix();
+
 
 		// Draw cube
 		glDrawArrays(GL_TRIANGLES, 0, 36);
