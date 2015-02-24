@@ -12,17 +12,17 @@
 #include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-
-
+#include <png.h>
+#include <GLKit/GLKit.h>
 #include "Leaf.h"
 #include "World.h"
 #include "SOIL.h"
-
+#include <QuartzCore/QuartzCore.h>
 #include <vector>
 static void error_callback(int error, const char* description);
 #include <fstream>
 #include <string>
-
+#include <SpriteKit/SpriteKit.h>
 #include "shader.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -30,11 +30,9 @@ static void error_callback(int error, const char* description);
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "controls.hpp"
-
 #include <OpenGL/gl3.h>
+#include <SOIL.h>
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-float getScalingConst();
 
 using namespace glm;
 GLFWwindow* window;
@@ -42,7 +40,13 @@ void loadTexture(const char * imagepath, GLuint shaderProgram, const char * name
 
 int main()
 {
-    
+  /*  GLuint tex_2d = SOIL_load_OGL_texture
+    (
+     "img.png",
+     SOIL_LOAD_AUTO,
+     SOIL_CREATE_NEW_ID,
+     SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+     );*/
     
     // Initialise GLFW
     if (!glfwInit())
@@ -87,61 +91,30 @@ int main()
     
     
     GLfloat vertices[] = {
-        //leaf
         //shape				//color			//uv-coord
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,		//botten
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        
-        -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,		//topp
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        
-        -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,	//topp
         -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
         -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
         -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
         
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        
-        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        
+        -3.5f, 3.5f, 3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 0.0f,	//golv
+        -3.5f, 3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 1.0f,
+        -3.5f, -3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 1.0f,
+        -3.5f, -3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 1.0f,
+        -3.5f, -3.5f, 3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 0.0f,
+        -3.5f, 3.5f, 3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 0.0f,
         
         - 3.5f, -3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 1.0f,	//bakgrund
         3.5f, -3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 0.0f,
         3.5f, 3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 0.0f,
-        
         3.5f, 3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 0.0f,
         -3.5f, 3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 1.0f,
         -3.5f, -3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 1.0f
         
-        
     };
+    
     
     // Create Vertex Array Object
     GLuint vao;
@@ -156,19 +129,23 @@ int main()
     
     //load shaders
     GLuint shaderProgram = LoadShaders("vertexShader.glsl", "fragmentShader.glsl");
+    
+    //useShader
     glUseProgram(shaderProgram);
     
     
     GLuint textures[2];
     glGenTextures(2, textures);
     
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[0]);
-   //loadTexture("sampleDog.png", shaderProgram, "texDog", 0);
+    loadTexture("sampleDog.png", shaderProgram, "texDog", 0);
+    
     
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, textures[1]);
-    //loadTexture("sampleLeaf.png", shaderProgram, "texLeaf", 1);
+    loadTexture("sampleLeaf.png", shaderProgram, "texLeaf", 1);
     
     
     
@@ -197,22 +174,26 @@ int main()
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
     
+    
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
     glEnableVertexAttribArray(colAttrib);
     glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    
     
     GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
     glEnableVertexAttribArray(texAttrib);
     glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
     // Compute the MVP matrix from keyboard and mouse input
     
+    
+    //sätter alla variabler
     double airCoeff = 1.28;
     double dens = 1.2041;
     double area = 0.0025;
     double mass = 0.1;
     btVector3 pos(0, 0, 0);
     btVector3 startAngle(0.f, 0.f, 0.f);
-    const btVector3  flu(0.0f,0.0f,0.0f);
+    btVector3  flu(0.0f, 0.0f, 0.0f);
     vector <Leaf> theLeaves;
     srand(time(NULL));
     btVector3 wind(0.0f, 1.0f, 0.0f);
@@ -222,14 +203,17 @@ int main()
     
     btVector3 airCurrent = wind + theWorld.getDynamicsWorld()->getGravity();
     airCurrent.normalized();
-    for (int i = 0; i < 53; i++)
+    
+    btRigidBody* body;
+    for (int i = 0; i < 4000; i++)
     {
-        float randNumbX = rand() % 10 -5;
+        float randNumbX = rand() % 10 - 5;
         float randNumbY = rand() % 10 - 5;
         float randNumbZ = rand() % 10 - 5;
         pos = btVector3(randNumbX, randNumbY, randNumbZ);
         startAngle = btVector3(randNumbX*10, randNumbY*5, randNumbZ*10);
         Leaf newLeaf(mass, area, dens, airCoeff, pos, flu, startAngle);
+        
         
         theLeaves.push_back(newLeaf);
         
@@ -238,9 +222,8 @@ int main()
     }
     
     
-    
     do{
-        
+        glEnable(GL_DEPTH_TEST);
         //glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         //glDepthMask(GL_TRUE);
@@ -266,9 +249,11 @@ int main()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // getOpenGLMatrix();
-        glm::mat4 model = glm::rotate(model, ((glm::mediump_float)90), glm::vec3(0,0,1));
+        glm::mat4 model = glm::rotate(90.0f, glm::vec3(0.0f, 0.0f, 1.0f));
         
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+        
+        //draw plane
         glDrawArrays(GL_TRIANGLES, 6, 18);
         
         
@@ -279,6 +264,9 @@ int main()
                             );
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
         
+        float ratio;
+        int width, height;
+        //float velocity = getVelocity(tid);
         
         theWorld.getDynamicsWorld()->stepSimulation(1 / 100.f, 100000);
         btVector3 velo;
@@ -286,7 +274,6 @@ int main()
         btTransform trans;
         btTransform trans_local;
         
-        glPushMatrix();
         
         for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
         {
@@ -308,21 +295,17 @@ int main()
             it->getBody()->getMotionState()->getWorldTransform(trans);
             
             trans.getOpenGLMatrix(transMatrix);
+            
             glUniformMatrix4fv(uniModel, 1, GL_FALSE, transMatrix);
+            
             glMultMatrixf((GLfloat*)transMatrix);
             
-            // Draw cube
-            glDrawArrays(GL_TRIANGLES, 0, 6);
             
-            //nödvändig för färg
+            glDrawArrays(GL_TRIANGLES, 0, 6);
             glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
             
+            
         }
-        
-
-        
-        
-        
         
         // Swap buffers
         glfwSwapBuffers(window);
@@ -332,6 +315,12 @@ int main()
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0);
     
+    
+    
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    
+    
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
     glDeleteProgram(shaderProgram);
@@ -339,6 +328,5 @@ int main()
     
     glfwTerminate();
     return 0;
-    
     
 }
