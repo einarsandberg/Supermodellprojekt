@@ -23,28 +23,30 @@ class Leaf
 {
 public:
     Leaf(double m, double a, double dens, double air,
-            const btVector3& pos, const btVector3& flu,const btVector3& angularVel);
-	//~Leaf();
-	btRigidBody* getBody();
-	float setFlutter(float time);
-	btVector3 getFlutter(const btVector3& angularPos);
-	btVector3 getRotation();
+         const btVector3& pos, const btVector3& flu, const btVector3& startAngle);
+    //~Leaf();
+    btRigidBody* getBody();
+    float setFlutter(float time);
+    btVector3 getFlutter(const btVector3& angularPos);
+    btVector3 getRotation();
     double getMass();
-	void drawLeaf();
-	btVector3 getPosition();
-	double getAirResistance(const btVector3& velocity, double a, double d);
-
+    void drawLeaf();
+    btVector3 getPosition();
+    double getAirResistance(const btVector3& velocity, double a, double d);
+    double bulletScalar(const btVector3& vec1, const btVector3& vec2);
+    
 protected:
-	glm::vec3 velocity;
-	double mass, angle, airCoeff, density, area;
-	btVector3 flutter;
-	btVector3 position, angularVelocity;
-	
-	bool life;
+    glm::vec3 velocity;
+    double mass, angle, airCoeff, density, area;
+    btVector3 flutter;
+    btVector3 position, startAng;
+    
+    bool life;
     //bullet shit
-	btRigidBody* leafBody;
+    btRigidBody* leafBody;
     btCollisionShape* fallShape;
     btDefaultMotionState* fallMotionState;
     btVector3 fallInertia;
     btQuaternion rotation;
+    
 };
