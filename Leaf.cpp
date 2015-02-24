@@ -7,21 +7,16 @@
 
 /* vertex_array */
 //#include "stdafx.h"
-#include "GL/glew.h"
-
 #include "glm/glm.hpp"
 #include "Leaf.h"
 #include <math.h>
 #include <time.h>
-#include "GL/glfw3.h" // GLFW helper library
-#include "btBulletDynamicsCommon.h"
-#include "btBulletCollisionCommon.h"
-#include <BulletDynamics\Dynamics\btDynamicsWorld.h>
-#include <BulletCollision\Gimpact\btGImpactCollisionAlgorithm.h>
-#include <BulletCollision\CollisionShapes\btSphereShape.h>
+#include "glfw3.h" // GLFW helper library
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletCollision/btBulletCollisionCommon.h>
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <iostream>
-#include <common/shader.hpp>
-
 const int antalPos = 3;
 
 Leaf::Leaf(double m, double a, double dens, double air,
@@ -91,7 +86,6 @@ btRigidBody* Leaf::getBody()
 
 btVector3 Leaf::getRotation()
 {
-<<<<<<< HEAD
 	return rotation;
 }
 

@@ -7,8 +7,8 @@
 //
 
 #include <stdio.h>
-#include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 class World
@@ -24,4 +24,7 @@ class World
         btCollisionDispatcher* dispatcher;
         btSequentialImpulseConstraintSolver* solver;
         btDiscreteDynamicsWorld* dynamicsWorld;
+        btDefaultMotionState* groundMotionState;
+        btCollisionShape* groundShape;
+        btRigidBody* groundRigidBody;
 };

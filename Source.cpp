@@ -147,27 +147,11 @@ int main()
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     loadTexture("sampleLeaf.png", shaderProgram, "texLeaf", 1);
     
-    
-    
-    
-    // Set up projection
-    glm::mat4 view = glm::lookAt(
-                                 glm::vec3(2.5f, 2.5f, 2.0f),
-                                 glm::vec3(0.0f, 0.0f, 0.0f),
-                                 glm::vec3(0.0f, 0.0f, 1.0f)
-                                 );
-    
-    glm::mat4 proj = glm::perspective(45.0f, 800.0f / 600.0f, 1.0f, 10.0f);
-    
-    //glm::mat4 MVP = proj * view;
-    
     GLint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
     
     GLint uniModel = glGetUniformLocation(shaderProgram, "model");
     
     GLint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-    
-    
     
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
@@ -205,7 +189,7 @@ int main()
     airCurrent.normalized();
     
     btRigidBody* body;
-    for (int i = 0; i < 4000; i++)
+    for (int i = 0; i < 100; i++)
     {
         float randNumbX = rand() % 10 - 5;
         float randNumbY = rand() % 10 - 5;
@@ -213,7 +197,6 @@ int main()
         pos = btVector3(randNumbX, randNumbY, randNumbZ);
         startAngle = btVector3(randNumbX*10, randNumbY*5, randNumbZ*10);
         Leaf newLeaf(mass, area, dens, airCoeff, pos, flu, startAngle);
-        
         
         theLeaves.push_back(newLeaf);
         
@@ -278,14 +261,12 @@ int main()
         for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
         {
             
-            glScalef(0.01f, 0.01f, 0.01f);
-            
             btVector3 pos = it->getPosition();
             //cout << *it->getFlutter(it->getRotation()) << '\n';
             
-            glTranslatef(it->getFlutter(it->getRotation()).getX(), it->getFlutter(it->getRotation()).getY(),0);
+            glTranslatef(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(),0);
             
-            it->getBody()->setAngularVelocity(it->getRotation());
+            it->getBody()->setAngularVelocity(it->getAngVel());
             
             velo = it->getBody()->getLinearVelocity();
             

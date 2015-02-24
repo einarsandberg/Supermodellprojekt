@@ -6,13 +6,13 @@
 //  Copyright (c) 2015 Einar Sandberg. All rights reserved.
 //
 
-#include "GL/glfw3.h"// GLFW helper library
+#include "glfw3.h"// GLFW helper library
 #include "glm/glm.hpp"
 #include <stdio.h>
 //#include "glew.h"
 #include <math.h>
-#include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
