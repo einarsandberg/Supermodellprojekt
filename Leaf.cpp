@@ -61,22 +61,23 @@ btVector3 Leaf::getPosition()
 
 btVector3 Leaf::getFlutter(const btVector3& angularPos)
 {
+	btVector3 angularPos2 = btVector3(angularPos.getX() / (float)glfwGetTime(), angularPos.getY() / (float)glfwGetTime(), angularPos.getZ() / (float)glfwGetTime());
+	
 	float width = 0.005;
 	float length = 0.005;
 	float farokskonstant = sqrt(mass / (density*pow(length, 2)*width));
 
 	/**/
 	//fixa med krafter, skaffa Aortogonal, Aparallell och rökna på vinkelpositioner ist för tid.
-	float flutterX = (-sinf(angularPos.getX())*sinf(angularPos.getX()) + abs(cosf(angularPos.getX()))*cosf(angularPos.getX() + 3) - abs(sinf(angularPos.getX() + 3))*cosf(angularPos.getX() / 2 + 3.14 / 2)) * 1000 / (farokskonstant);
-	float flutterY = (-leafBody->getInterpolationLinearVelocity().getY() / farokskonstant * (sinf(angularPos.getY())*cosf(angularPos.getY()) + abs(cosf(angularPos.getY()))*sinf(angularPos.getY() + 3) - abs(sinf(angularPos.getY() + 3))*sinf(angularPos.getY() / 2 + 3.14 / 2)) * 1000 / (farokskonstant));
-	float flutterZ = (-sinf(angularPos.getZ())*sinf(angularPos.getZ()) + abs(cosf(angularPos.getZ()))*cosf(angularPos.getZ() + 3) - abs(sinf(angularPos.getZ() + 3))*cosf(angularPos.getZ() / 2 + 3.14 / 2)) * 1000 / (farokskonstant);
+	float flutterX = (-sinf(angularPos2.getX())*sinf(angularPos2.getX()) + abs(cosf(angularPos2.getX()))*cosf(angularPos2.getX() + 3) - abs(sinf(angularPos2.getX() + 3))*cosf(angularPos2.getX() / 2 + 3.14 / 2)) * 10000 / (farokskonstant);
+	float flutterZ = (-pow(2,leafBody->getAngularVelocity().getY()) / farokskonstant * (sinf(angularPos2.getY())*cosf(angularPos2.getY()) + abs(cosf(angularPos2.getY()))*sinf(angularPos2.getY() + 3) - abs(sinf(angularPos2.getY() + 3))*sinf(angularPos.getY() / 2 + 3.14 / 2)) * 10000 / (farokskonstant));
+	float flutterY = (-sinf(angularPos2.getZ())*sinf(angularPos2.getZ()) + abs(cosf(angularPos2.getZ()))*cosf(angularPos2.getZ() + 3) - abs(sinf(angularPos2.getZ() + 3))*cosf(angularPos2.getZ() / 2 + 3.14 / 2)) * 10000 / (farokskonstant);
 
 	//std::cout << flutter << '\n';*/
 	flutter = btVector3(flutterX, flutterY, flutterZ);
 	return flutter;
 
 }
-
 
 double Leaf::getAirResistance(const btVector3& velocity, double a, double d)
 {
@@ -90,12 +91,15 @@ btRigidBody* Leaf::getBody()
 
 btVector3 Leaf::getRotation()
 {
+<<<<<<< HEAD
 	return rotation;
 }
 
 btVector3 Leaf::getAngVel()
 {	
-	return btVector3(leafBody->getLinearVelocity().getX() / 0.5 - 1, leafBody->getLinearVelocity().getY() / 5 , leafBody->getLinearVelocity().getZ() / 0.5);
+	btVector3 direction = angVel / angVel.absolute();
+
+	return position+ btVector3(leafBody->getLinearVelocity().getX()/0.5 , leafBody->getLinearVelocity().getY()/5 , leafBody->getLinearVelocity().getZ() / 0.5);
 }
 double Leaf::getMass()
 {
