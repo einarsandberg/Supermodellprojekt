@@ -35,6 +35,7 @@ public:
 	btVector3 getPosition();
 	double getAirResistance(const btVector3& velocity, double a, double d);
 	double bulletScalar(const btVector3& vec1, const btVector3& vec2);
+	btVector3 Leaf::normVec(const btVector3& vec1);
 
 protected:
 	glm::vec3 velocity;

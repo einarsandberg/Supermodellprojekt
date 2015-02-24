@@ -132,9 +132,6 @@ int main()
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, textures[1]);
 	loadTexture("sampleLeaf.png", shaderProgram, "texLeaf", 1);
-	
-
-	
 
 	// Set up projection
 	glm::mat4 view = glm::lookAt(
@@ -182,13 +179,13 @@ int main()
 	btVector3  flu(0.0f, 0.0f, 0.0f);
 	vector <Leaf> theLeaves;
 	srand(time(NULL));
-	btVector3 wind(0.0f, 1.0f, 0.0f);
+	btVector3 wind(2.0f, 0.0f, 0.0f);
 
 	World theWorld;
 	btScalar transMatrix[16];
 
 	btVector3 airCurrent = wind + theWorld.getDynamicsWorld()->getGravity();
-	airCurrent.normalized();
+	//airCurrent.normalized();
 	
 	btRigidBody* body;
 	for (int i = 0; i < 200; i++)
@@ -208,7 +205,7 @@ int main()
 	}
 
 	do{
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		//glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 		//glDepthMask(GL_TRUE);
@@ -275,7 +272,14 @@ int main()
 
 			velo = it->getBody()->getLinearVelocity();
 
-			airRes = it->getAirResistance(velo, area, dens);
+			airCurrent = it->normVec(airCurrent);
+			btVector3 normal = it->normVec(it->getRotation());
+			double areaMult = it->bulletScalar(normal, airCurrent);
+
+			if (areaMult >= 1)
+				std::cout << areaMult << endl;
+
+			airRes = it->getAirResistance(velo, areaMult*area, dens);
 
 		//  getEffectiveArea()
 			//it->getBody()->applyCentralForce(btVector3(1, 0, 2));
