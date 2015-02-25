@@ -38,7 +38,7 @@ Leaf::Leaf(double m, double a, double dens, double air, const btVector3& pos, co
 	rotation = normVec(rotation);
 	fallShape = new btSphereShape(1);
 	fallMotionState =
-		new btDefaultMotionState(btTransform(btQuaternion(0, 0, 1, 0), btVector3(position)));
+		new btDefaultMotionState(btTransform(btQuaternion(rotation, 1), btVector3(position)));
 	fallInertia = btVector3(0, 0, 0);
 	fallShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
