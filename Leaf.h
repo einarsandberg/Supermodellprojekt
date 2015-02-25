@@ -27,7 +27,7 @@ public:
 	//~Leaf();
 	btRigidBody* getBody();
 	float setFlutter(float time);
-	btVector3 getFlutter(const btVector3& angularPos);
+	btVector3 getFlutter(const btVector3& angularPos, float areaMult);
 	btVector3 getAngVel();
 	btVector3 getRotation();
 	double getMass();

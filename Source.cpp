@@ -168,7 +168,7 @@ int main()
 	btVector3  flu(0.0f, 0.0f, 0.0f);
 	vector <Leaf> theLeaves;
 	srand(time(NULL));
-	btVector3 wind(2.0f, 0.0f, 0.0f);
+	btVector3 wind(-2.0f, 5.0f, 0.0f);
 
 	World theWorld;
 	btScalar transMatrix[16];
@@ -177,7 +177,7 @@ int main()
 	//airCurrent.normalized();
 	
 	btRigidBody* body;
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 600; i++)
 	{
 		float randNumbX = rand() % 10 - 5;
 		float randNumbY = rand() % 10 - 5;
@@ -194,7 +194,7 @@ int main()
 	}
 	
 	do{
-		//glEnable(GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
 		//glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 		//glDepthMask(GL_TRUE);
@@ -225,7 +225,7 @@ int main()
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		//draw plane
-	//	glDrawArrays(GL_TRIANGLES, 6, 12);
+		glDrawArrays(GL_TRIANGLES, 6, 12);
 
 		/*
 		model = glm::rotate(
@@ -250,20 +250,22 @@ int main()
 
 		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
 		{
-			//glScalef(0.01f, 0.01f, 0.01f);
-	
+			//glScalef(0.01f, 0.01f, 0.01f)
+			//normaliserande av en kraftevektor ger en begränsad kraftpåverkan senare, 
+			//borde tänkas om lite. airCurrent2 är lite fulhax
+			btVector3 airCurrent2 = it->normVec(airCurrent);
+			btVector3 normal = it->normVec(it->getRotation());
+			double areaMult = it->bulletScalar(normal, airCurrent2);
 			btVector3 pos = it->getPosition();
 			//cout << *it->getFlutter(it->getAngVel()) << '\n';
-			
-			//glTranslatef(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(),it->getFlutter(it->getAngVel()).getZ());
-			it->getBody()->applyCentralForce(btVector3(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(), it->getFlutter(it->getAngVel()).getZ()));
-			it->getBody()->setAngularVelocity(it->getAngVel());
-
 			velo = it->getBody()->getLinearVelocity();
+			//glTranslatef(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(),it->getFlutter(it->getAngVel()).getZ());
+			it->getBody()->applyCentralForce(btVector3(it->getFlutter(it->getAngVel(), areaMult).getX(), it->getFlutter(it->getAngVel(), areaMult).getY(), it->getFlutter(it->getAngVel(), areaMult).getZ()));
+			it->getBody()->setAngularVelocity(it->getAngVel());
+			//it->getBody()->applyCentralForce(airCurrent);
+			
 
-			airCurrent = it->normVec(airCurrent);
-			btVector3 normal = it->normVec(it->getRotation());
-			double areaMult = it->bulletScalar(normal, airCurrent);
+			
 
 			if (areaMult >= 1)
 				std::cout << areaMult << endl;
@@ -273,7 +275,7 @@ int main()
 		//  getEffectiveArea()
 			//it->getBody()->applyCentralForce(btVector3(1, 0, 2));
 			it->getBody()->applyTorque(it->getAngVel());
-			it->getBody()->applyCentralForce(btVector3(0.f, airRes+it->getFlutter(it->getAngVel()).getZ(), 0.f));
+			it->getBody()->applyCentralForce(btVector3(0.f, airRes + it->getFlutter(it->getAngVel(), areaMult).getZ(), 0.f));
 			it->getBody()->getMotionState()->getWorldTransform(trans);
 
 			trans.getOpenGLMatrix(transMatrix);
