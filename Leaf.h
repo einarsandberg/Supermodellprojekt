@@ -11,6 +11,7 @@
 #include <stdio.h>
 //#include "glew.h"
 #include <math.h>
+#include <iostream>
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btDynamicsWorld.h>
@@ -23,31 +24,32 @@ class Leaf
 {
 public:
 	Leaf(double m, double a, double dens, double air,
-		const btVector3& pos, const btVector3& flu, const btVector3& Angle);
+		const btVector3& pos, const btVector3& flu, const btVector3& startAngle, double newlife);
 	//~Leaf();
 	btRigidBody* getBody();
 	float setFlutter(float time);
-	btVector3 getFlutter(const btVector3& angularPos, float areaMult);
-	btVector3 getAngVel();
+	btVector3 getFlutter(const btVector3& angularPos);
 	btVector3 getRotation();
 	double getMass();
 	void drawLeaf();
+	double life;
+	btDefaultMotionState* getFallMotionState();
 	btVector3 getPosition();
 	double getAirResistance(const btVector3& velocity, double a, double d);
 	double bulletScalar(const btVector3& vec1, const btVector3& vec2);
-	btVector3 Leaf::normVec(const btVector3& vec1);
-	btVector3 Leaf::noise();
+	void setPosition(const btVector3& newPos);
+	friend ostream& operator<< (ostream& os, const Leaf& b);
 
 protected:
 	glm::vec3 velocity;
-	double mass, angleVel, airCoeff, density, area;
+	double mass, angle, airCoeff, density, area;
 	btVector3 flutter;
-	btVector3 position, rotation, angVel;
+	btVector3 position, startAng;
 
-	bool life;
 	//bullet shit
 	btRigidBody* leafBody;
 	btCollisionShape* fallShape;
 	btDefaultMotionState* fallMotionState;
 	btVector3 fallInertia;
+	btQuaternion rotation;
 };
