@@ -16,7 +16,6 @@ GLFWwindow* window;
 #include "BulletDynamics\Dynamics\btDynamicsWorld.h"
 #include "BulletCollision\Gimpact\btGImpactCollisionAlgorithm.h"
 
-
 #include "Leaf.h"
 #include "World.h"
 #include <vector>
@@ -31,14 +30,10 @@ using namespace glm;
 #include <common/shader.hpp>
 #include <common/controls.hpp>
 
-
-
 void loadTexture(const char * imagepath, GLuint shaderProgram, const char * name, int i);
 
 int main()
 {
-	
-
 	// Initialise GLFW
 	if (!glfwInit())
 	{
@@ -52,9 +47,7 @@ int main()
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	
 
-	
 	window = glfwCreateWindow(1000, 800, "Tutorial 01", NULL, NULL);
 	if (window == NULL){
 		fprintf(stderr, "Failed to open GLFW window.");
@@ -74,7 +67,6 @@ int main()
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	
 	GLfloat vertices[] = {
 		//shape				//color			//uv-coord
 		-0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,	//topp
@@ -97,10 +89,7 @@ int main()
 		3.5f, 3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 0.0f,
 		-3.5f, 3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 0.0f, 1.0f,
 		-3.5f, -3.5f, -3.5f, 1.0f, 1.0f, 0.9f, 1.0f, 1.0f
-
-
 	};
-	
 	
 	// Create Vertex Array Object
 	GLuint vao;
@@ -128,7 +117,6 @@ int main()
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	loadTexture("sampleDog.png", shaderProgram, "texDog", 0);
 
-	
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, textures[1]);
 	loadTexture("sampleLeaf.png", shaderProgram, "texLeaf", 1);
@@ -138,25 +126,20 @@ int main()
 	GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 
 	GLint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
-
-	
 	
 	// Specify the layout of the vertex data
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 	
-	
 	GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
 	glEnableVertexAttribArray(colAttrib);
 	glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	
 
 	GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
 	glEnableVertexAttribArray(texAttrib);
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
 	// Compute the MVP matrix from keyboard and mouse input
-	
 	
 	//sätter alla variabler
 	double airCoeff = 1.28;
@@ -169,7 +152,7 @@ int main()
 	vector <Leaf> theLeaves;
 	srand(time(NULL));
 	btVector3 wind(-2.0f, 5.0f, 0.0f);
-
+	btVector3 randomForce(0, 0, 0);
 	World theWorld;
 	btScalar transMatrix[16];
 
@@ -213,9 +196,7 @@ int main()
 		glm::mat4 ModelMatrix = glm::mat4(1.0);
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -226,15 +207,6 @@ int main()
 
 		//draw plane
 		glDrawArrays(GL_TRIANGLES, 6, 12);
-
-		/*
-		model = glm::rotate(
-			model,
-			(GLfloat)clock() / (GLfloat)CLOCKS_PER_SEC * -180.0f,
-			glm::vec3(0.0f, 0.0f, 1.0f)
-			);
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-		*/
 
 		float ratio;
 		int width, height;
@@ -247,12 +219,13 @@ int main()
 		btTransform trans_local;
 		// Measure speed
 	
-
+	
 		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
 		{
 			//glScalef(0.01f, 0.01f, 0.01f)
 			//normaliserande av en kraftevektor ger en begränsad kraftpåverkan senare, 
 			//borde tänkas om lite. airCurrent2 är lite fulhax
+
 			btVector3 airCurrent2 = it->normVec(airCurrent);
 			btVector3 normal = it->normVec(it->getRotation());
 			double areaMult = it->bulletScalar(normal, airCurrent2);
@@ -260,33 +233,31 @@ int main()
 			//cout << *it->getFlutter(it->getAngVel()) << '\n';
 			velo = it->getBody()->getLinearVelocity();
 			//glTranslatef(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(),it->getFlutter(it->getAngVel()).getZ());
+			
 			it->getBody()->applyCentralForce(btVector3(it->getFlutter(it->getAngVel(), areaMult).getX(), it->getFlutter(it->getAngVel(), areaMult).getY(), it->getFlutter(it->getAngVel(), areaMult).getZ()));
+			
 			it->getBody()->setAngularVelocity(it->getAngVel());
-			//it->getBody()->applyCentralForce(airCurrent);
-			
+			//bryter cirkulationen runt egen axel
+			it->getBody()->setAngularVelocity(areaMult*it->noise());
 
-			
+			it->getBody()->applyCentralForce(airCurrent*mass);
+			it->getBody()->applyCentralImpulse(it->noise());
 
 			if (areaMult >= 1)
 				std::cout << areaMult << endl;
 
 			airRes = it->getAirResistance(velo, areaMult*area, dens);
 
-		//  getEffectiveArea()
-			//it->getBody()->applyCentralForce(btVector3(1, 0, 2));
 			it->getBody()->applyTorque(it->getAngVel());
 			it->getBody()->applyCentralForce(btVector3(0.f, airRes + it->getFlutter(it->getAngVel(), areaMult).getZ(), 0.f));
 			it->getBody()->getMotionState()->getWorldTransform(trans);
 
 			trans.getOpenGLMatrix(transMatrix);
-
-			//std::cout<< time<<'\n';
-
+		
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, transMatrix);
 
 			glMultMatrixf((GLfloat*)transMatrix);
 
-			
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
 			

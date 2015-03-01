@@ -126,3 +126,14 @@ btVector3 Leaf::normVec(const btVector3& vec1)
 	btVector3 ans = btVector3((vec1.getX() / div), (vec1.getY() / div), (vec1.getZ() / div));
 	return ans;
 }
+btVector3 Leaf::noise(){
+
+	float noiseX = (rand() % 100 -50);
+	float noiseY = (rand() % 100 -50);
+	float noiseZ = (rand() % 100 -50);
+	//std::cout << noiseX << '\n';
+	//skickar tillbaka en vector med impulskrafter för att bryta upp
+	//"molnet" med löv, anpassade storleken efter hur stora resten av
+	//krafterna är,detta är inte förankrat i verkligheten.
+	return btVector3(noiseX/5000, noiseY/5000, noiseZ/5000);
+}
