@@ -160,7 +160,7 @@ int main()
 	//airCurrent.normalized();
 	
 	btRigidBody* body;
-	for (int i = 0; i < 800; i++)
+	for (int i = 0; i <800 ; i++)
 	{
 		float randNumbX = rand() % 10 - 5;
 		float randNumbY = rand() % 20 - 10;
@@ -243,7 +243,7 @@ int main()
 				radius = btVector3(radius.getX()*0.03, radius.getY()*0.03, radius.getZ()*0.03);
 
 				btVector3 torqueVec = radius.cross(sumForces);
-
+				it->getBody()->applyTorque(torqueVec);
 				it->getBody()->setAngularVelocity(areaMult*it->getAngVel());
 
 				it->getBody()->applyCentralForce(airCurrent*mass);
@@ -253,7 +253,7 @@ int main()
 
 				//it->getBody()->setAngularVelocity(it->noise());
 				it->getBody()->applyCentralForce(btVector3(0, airRes, 0));
-				it->getBody()->applyTorque(torqueVec);
+			
 				/*
 				it->getBody()->applyTorque(
 					btVector3(

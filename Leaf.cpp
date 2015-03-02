@@ -52,7 +52,8 @@ btVector3 Leaf::getFlutter(const btVector3& angularPos, float effectiveArea)
 
 	float width = 0.005;
 	float length = 0.005;
-	float farokskonstant = sqrt(mass / (density*pow(length, 2)*width));
+	
+	float farokskonstant = sqrt(mass / (density*(pow(length, 2)*width))*(effectiveArea+0.01));
 
 	/**/
 	//fixa med krafter, skaffa Aortogonal, Aparallell och rökna på vinkelpositioner ist för tid.
@@ -93,11 +94,11 @@ btVector3 Leaf::getAngVel()
 {	
 	btVector3 AngVel = btVector3(
 		leafBody->getLinearVelocity().getX()/0.035 ,
-		leafBody->getLinearVelocity().getY(),
+		leafBody->getLinearVelocity().getY()/5,
 		leafBody->getLinearVelocity().getZ()/0.035 );
 	rotation = rotation + AngVel;
 
-	return AngVel+noise();
+	return AngVel;
 }
 double Leaf::getMass()
 {
