@@ -24,102 +24,83 @@
 
 const int antalPos = 3;
 
-
-
-Leaf::Leaf(double m, double a, double dens, double air,
-	const btVector3& pos, const btVector3& flu, const btVector3& startAngle, double newlife)
+Leaf::Leaf(double m, double a, double dens, double air, const btVector3& pos, const btVector3& flu, const btVector3& angleVel)
 {
 	mass = m;
 	area = a;
-	life = newlife;
 	density = dens;
 	airCoeff = air;
 	position = pos;
 	flutter = flu;
-	startAng = startAngle;
+	angVel = angleVel;
 
-	rotation = btQuaternion(0, 0, 0, 1);
+	rotation = btVector3(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
+	rotation = normVec(rotation);
 	fallShape = new btSphereShape(1);
-	fallMotionState = new btDefaultMotionState(btTransform(rotation, btVector3(position)));
+	fallMotionState =
+		new btDefaultMotionState(btTransform(btQuaternion(rotation, 1), btVector3(position)));
 	fallInertia = btVector3(0, 0, 0);
 	fallShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
 	leafBody = new btRigidBody(fallRigidBodyCI);
 	leafBody->setLinearVelocity(btVector3(0, 0, 0));
-
-
-
 }
 
-/*
-Leaf::~Leaf()
+/*Leaf::~Leaf()
 {
-	delete leafBody->getMotionState();
-	delete fallShape;
-	delete leafBody;
-}
-*/
+delete leafBody->getMotionState();
+delete fallShape;
+//delete leafBody;
+
+
+}*/
 
 btVector3 Leaf::getPosition()
 {
-	btVector3 positionFall = getBody()->getCenterOfMassPosition();
-	return positionFall;
-}
-void Leaf::setPosition(const btVector3& newPos){
-	position = newPos;
-	getBody()->translate(btVector3(position));
-
+    return position;
 }
 
-btVector3 Leaf::getFlutter(const btVector3& angularPos)
+btVector3 Leaf::getFlutter(const btVector3& angularPos, float effectiveArea)
 {
+	btVector3 angularPos2 = btVector3(angularPos.getX() / (float)glfwGetTime(), angularPos.getY() / (float)glfwGetTime(), angularPos.getZ() / (float)glfwGetTime());
+
 	float width = 0.005;
 	float length = 0.005;
 	float farokskonstant = sqrt(mass / (density*pow(length, 2)*width));
 
 	/**/
 	//fixa med krafter, skaffa Aortogonal, Aparallell och rökna på vinkelpositioner ist för tid.
-	float flutterX = (-sinf(angularPos.getX())*sinf(angularPos.getX()) + abs(cosf(angularPos.getX()))*cosf(angularPos.getX() + 3) - abs(sinf(angularPos.getX() + 3))*cosf(angularPos.getX() / 2 + 3.14 / 2)) * 1000 / (farokskonstant);
-	float flutterY = (-leafBody->getInterpolationLinearVelocity().getY() / farokskonstant * (sinf(angularPos.getY())*cosf(angularPos.getY()) + abs(cosf(angularPos.getY()))*sinf(angularPos.getY() + 3) - abs(sinf(angularPos.getY() + 3))*sinf(angularPos.getY() / 2 + 3.14 / 2)) * 1000 / (farokskonstant));
-	float flutterZ = (-sinf(angularPos.getZ())*sinf(angularPos.getZ()) + abs(cosf(angularPos.getZ()))*cosf(angularPos.getZ() + 3) - abs(sinf(angularPos.getZ() + 3))*cosf(angularPos.getZ() / 2 + 3.14 / 2)) * 1000 / (farokskonstant);
+	float flutterX = (-effectiveArea*sinf(angularPos2.getX())*sinf(angularPos2.getX()) + (1 - effectiveArea)*abs(cosf(angularPos2.getX()))*cosf(angularPos2.getX() + 3) - abs(sinf(angularPos2.getX() + 3))*cosf(angularPos2.getX() / 2 + 3.14 / 2)) / (farokskonstant);
+	float flutterY = (-effectiveArea*pow(leafBody->getAngularVelocity().getY(), 2) / farokskonstant * (sinf(angularPos2.getY())*cosf(angularPos2.getY()) + abs(cosf(angularPos2.getY()))*sinf(angularPos2.getY() + 3) - abs(sinf(angularPos2.getY() + 3))*sinf(angularPos.getY() / 2 + 3.14 / 2)) / (farokskonstant));
+	float flutterZ = ((1 - effectiveArea )- sinf(angularPos2.getZ())*sinf(angularPos2.getZ()) + effectiveArea* abs(cosf(angularPos2.getZ()))*cosf(angularPos2.getZ() + 3) - abs(sinf(angularPos2.getZ() + 3))*cosf(angularPos2.getZ() / 2 + 3.14 / 2)) / (farokskonstant);
 
 	//std::cout << flutter << '\n';*/
 	flutter = btVector3(flutterX, flutterY, flutterZ);
 	return flutter;
-
 }
 
 
 double Leaf::getAirResistance(const btVector3& velocity, double a, double d)
 {
-	double airRes = pow(velocity.getY(), 2)*a*d;
-	return airRes;
+    double airRes = pow(velocity.getY(), 2)*a*d;
+    return airRes;
 }
 btRigidBody* Leaf::getBody()
 {
-	return leafBody;
+    return leafBody;
 }
-
-
-btDefaultMotionState* Leaf::getFallMotionState()
-{
-	return fallMotionState;
-}
-
-/*
-ostream& operator<<(ostream &os, const Leaf& theLeaf)
-{
-	os << theLeaf;
-	return os;
-}
-*/
-
-
 
 btVector3 Leaf::getRotation()
+{
+	return rotation;
+}
+
+btVector3 Leaf::getAngVel()
 {	
-	
-	return startAng/5 + btVector3(leafBody->getLinearVelocity().getX() / 0.5 - 1, leafBody->getLinearVelocity().getY() / 5 , leafBody->getLinearVelocity().getZ() / 0.5 - 1);
+	btVector3 AngVel = btVector3(leafBody->getLinearVelocity().getX() / 0.5 - 1, leafBody->getLinearVelocity().getY() / 5, leafBody->getLinearVelocity().getZ() / 0.5 - 1);
+	rotation = rotation + AngVel;
+	//rotation = rotation.normalized();
+	return AngVel;
 }
 double Leaf::getMass()
 {
@@ -137,4 +118,22 @@ double Leaf::bulletScalar(const btVector3& vec1, const btVector3& vec2)
 	double ans = (X1*X2) + (Y1*Y2) + (Z1*Z2);
 	ans = abs(ans);
 	return ans;
+}
+
+btVector3 Leaf::normVec(const btVector3& vec1)
+{
+	float div = sqrt(pow(vec1.getX(), 2) + pow(vec1.getY(), 2) + pow(vec1.getZ(), 2));
+	btVector3 ans = btVector3((vec1.getX() / div), (vec1.getY() / div), (vec1.getZ() / div));
+	return ans;
+}
+btVector3 Leaf::noise(){
+
+	float noiseX = (rand() % 100 -50);
+	float noiseY = (rand() % 100 -50);
+	float noiseZ = (rand() % 100 -50);
+	//std::cout << noiseX << '\n';
+	//skickar tillbaka en vector med impulskrafter för att bryta upp
+	//"molnet" med löv, anpassade storleken efter hur stora resten av
+	//krafterna är,detta är inte förankrat i verkligheten.
+	return btVector3(noiseX/5000, noiseY/5000, noiseZ/5000);
 }
