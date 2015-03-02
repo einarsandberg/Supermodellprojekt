@@ -33,7 +33,6 @@ public:
 	double getMass();
 	void drawLeaf();
 	double life;
-//hejjjjjjjj
 	btDefaultMotionState* getFallMotionState();
 	btVector3 getPosition();
 	double getAirResistance(const btVector3& velocity, double a, double d);
