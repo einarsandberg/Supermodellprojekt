@@ -55,10 +55,6 @@ delete fallShape;
 
 }*/
 
-btVector3 Leaf::getPosition()
-{
-    return position;
-}
 
 btVector3 Leaf::getFlutter(const btVector3& angularPos, float effectiveArea)
 {
@@ -136,4 +132,18 @@ btVector3 Leaf::noise(){
 	//"molnet" med löv, anpassade storleken efter hur stora resten av
 	//krafterna är,detta är inte förankrat i verkligheten.
 	return btVector3(noiseX/5000, noiseY/5000, noiseZ/5000);
+}
+
+btVector3 Leaf::getPosition()
+{
+	btVector3 positionFall = getBody()->getCenterOfMassPosition();
+	return positionFall;
+}
+
+
+void Leaf::setPosition(const btVector3& newPos){
+	position = newPos;
+	
+	getBody()->translate(btVector3(position));
+
 }

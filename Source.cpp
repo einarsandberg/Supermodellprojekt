@@ -145,13 +145,13 @@ int main()
 	double airCoeff = 1.28;
 	double dens = 1.2041;
 	double area = 0.0025;
-	double mass = 0.1;
+	double mass = 0.005;
 	btVector3 pos(0, 0, 0);
 	btVector3 startAngVel(0.f, 0.f, 0.f);
 	btVector3  flu(0.0f, 0.0f, 0.0f);
 	vector <Leaf> theLeaves;
 	srand(time(NULL));
-	btVector3 wind(-2.0f, 5.0f, 0.0f);
+	btVector3 wind(0.0f, 0.0f, 0.0f);
 	btVector3 randomForce(0, 0, 0);
 	World theWorld;
 	btScalar transMatrix[16];
@@ -221,45 +221,52 @@ int main()
 	
 	
 		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
-		{
+		{	
+			//std::cout << it->getBody()->getCenterOfMassPosition().getZ() << endl;
 			//glScalef(0.01f, 0.01f, 0.01f)
 			//normaliserande av en kraftevektor ger en begränsad kraftpåverkan senare, 
 			//borde tänkas om lite. airCurrent2 är lite fulhax
+			if (it->getBody()->getCenterOfMassPosition().getY() > -30.f){
 
-			btVector3 airCurrent2 = it->normVec(airCurrent);
-			btVector3 normal = it->normVec(it->getRotation());
-			double areaMult = it->bulletScalar(normal, airCurrent2);
-			btVector3 pos = it->getPosition();
-			//cout << *it->getFlutter(it->getAngVel()) << '\n';
-			velo = it->getBody()->getLinearVelocity();
-			//glTranslatef(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(),it->getFlutter(it->getAngVel()).getZ());
-			
-			it->getBody()->applyCentralForce(btVector3(it->getFlutter(it->getAngVel(), areaMult).getX(), it->getFlutter(it->getAngVel(), areaMult).getY(), it->getFlutter(it->getAngVel(), areaMult).getZ()));
-			
-			it->getBody()->setAngularVelocity(it->getAngVel());
-			//bryter cirkulationen runt egen axel
-			it->getBody()->setAngularVelocity(areaMult*it->noise());
+				btVector3 airCurrent2 = it->normVec(airCurrent);
+				btVector3 normal = it->normVec(it->getRotation());
+				double areaMult = it->bulletScalar(normal, airCurrent2);
+				btVector3 pos = it->getPosition();
+				//cout << *it->getFlutter(it->getAngVel()) << '\n';
+				velo = it->getBody()->getLinearVelocity();
+				//glTranslatef(it->getFlutter(it->getAngVel()).getX(), it->getFlutter(it->getAngVel()).getY(),it->getFlutter(it->getAngVel()).getZ());
 
-			it->getBody()->applyCentralForce(airCurrent*mass);
-			it->getBody()->applyCentralImpulse(it->noise());
+				it->getBody()->applyCentralForce(btVector3(it->getFlutter(it->getAngVel(), areaMult).getX(), it->getFlutter(it->getAngVel(), areaMult).getY(), it->getFlutter(it->getAngVel(), areaMult).getZ()));
 
-			if (areaMult >= 1)
-				std::cout << areaMult << endl;
+				it->getBody()->setAngularVelocity(it->getAngVel());
+				//bryter cirkulationen runt egen axel
+				//it->getBody()->setAngularVelocity(areaMult*it->noise());
 
-			airRes = it->getAirResistance(velo, areaMult*area, dens);
+				it->getBody()->applyCentralForce(airCurrent*mass);
+				//it->getBody()->applyCentralImpulse(it->noise());
 
-			it->getBody()->applyTorque(it->getAngVel());
-			it->getBody()->applyCentralForce(btVector3(0.f, airRes + it->getFlutter(it->getAngVel(), areaMult).getZ(), 0.f));
-			it->getBody()->getMotionState()->getWorldTransform(trans);
+				if (areaMult >= 1)
+					std::cout << areaMult << endl;
 
-			trans.getOpenGLMatrix(transMatrix);
-		
-			glUniformMatrix4fv(uniModel, 1, GL_FALSE, transMatrix);
+				airRes = it->getAirResistance(velo, areaMult*area, dens);
 
-			glMultMatrixf((GLfloat*)transMatrix);
+				it->getBody()->applyTorque(it->getAngVel());
+				it->getBody()->applyCentralForce(btVector3(0.f, airRes + it->getFlutter(it->getAngVel(), areaMult).getZ(), 0.f));
+				it->getBody()->getMotionState()->getWorldTransform(trans);
 
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
+				trans.getOpenGLMatrix(transMatrix);
+
+				glUniformMatrix4fv(uniModel, 1, GL_FALSE, transMatrix);
+
+				glMultMatrixf((GLfloat*)transMatrix);
+
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
+			}
+			else
+			{
+				it->getBody()->translate(btVector3(0.0f, 35.f, 0.f));
+			}
 			
 		}
 		
