@@ -46,16 +46,6 @@ Leaf::Leaf(double m, double a, double dens, double air, const btVector3& pos, co
 	leafBody->setLinearVelocity(btVector3(0, 0, 0));
 }
 
-/*Leaf::~Leaf()
-{
-delete leafBody->getMotionState();
-delete fallShape;
-//delete leafBody;
-
-
-}*/
-
-
 btVector3 Leaf::getFlutter(const btVector3& angularPos, float effectiveArea)
 {
 	btVector3 angularPos2 = btVector3(angularPos.getX() / (float)glfwGetTime(), angularPos.getY() / (float)glfwGetTime(), angularPos.getZ() / (float)glfwGetTime());
@@ -131,7 +121,7 @@ btVector3 Leaf::noise(){
 	//skickar tillbaka en vector med impulskrafter för att bryta upp
 	//"molnet" med löv, anpassade storleken efter hur stora resten av
 	//krafterna är,detta är inte förankrat i verkligheten.
-	return btVector3(noiseX/5000, noiseY/5000, noiseZ/5000);
+	return btVector3(noiseX/50, noiseY/50, noiseZ/50);
 }
 
 btVector3 Leaf::getPosition()
