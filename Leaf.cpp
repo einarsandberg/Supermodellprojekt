@@ -22,7 +22,7 @@
 #include <iostream>
 #include <common/shader.hpp>
 
-const int antalPos = 3;
+
 
 Leaf::Leaf(double m, double a, double dens, double air, const btVector3& pos, const btVector3& flu, const btVector3& angleVel)
 {
@@ -49,24 +49,22 @@ Leaf::Leaf(double m, double a, double dens, double air, const btVector3& pos, co
 btVector3 Leaf::getFlutter(const btVector3& angularPos, float effectiveArea)
 {
 	btVector3 angularPos2 = btVector3(angularPos.getX() / (float)glfwGetTime(), angularPos.getY() / (float)glfwGetTime(), angularPos.getZ() / (float)glfwGetTime());
-
-	float width = 0.005;
-	float length = 0.005;
 	
-	float farokskonstant = sqrt(mass / (density*(pow(length, 2)*width))*(effectiveArea+0.01));
+	const float width = 0.005;
+	const float length = 0.005;
 
-	/**/
-	//fixa med krafter, skaffa Aortogonal, Aparallell och rökna på vinkelpositioner ist för tid.
+	float farokskonstant = sqrt(mass / (density*(pow(length, 2)*width)));
+
 	float flutterX = (-effectiveArea*sinf(angularPos2.getX())*sinf(angularPos2.getX()) +
-		(1 - effectiveArea)*abs(cosf(angularPos2.getX()))*cosf(angularPos2.getX() + 3) -
+		(1 - effectiveArea)*abs(cosf(angularPos2.getX()))*cosf(angularPos2.getX() + 3.14 / 2) -
 		abs(sinf(angularPos2.getX() + 3))*cosf(angularPos2.getX() / 2 + 3.14 / 2)) / (farokskonstant);
 
 	float flutterY = (-effectiveArea*pow(leafBody->getAngularVelocity().getY(), 2) / farokskonstant * 
-		(sinf(angularPos2.getY())*cosf(angularPos2.getY()) + abs(cosf(angularPos2.getY()))*sinf(angularPos2.getY() + 3) 
+		(sinf(angularPos2.getY())*cosf(angularPos2.getY()) + abs(cosf(angularPos2.getY()))*sinf(angularPos2.getY() + 3.14) 
 		- abs(sinf(angularPos2.getY() + 3))*sinf(angularPos.getY() / 2 + 3.14 / 2)) / (farokskonstant));
 	
 	float flutterZ = ((1 - effectiveArea )- sinf(angularPos2.getZ())*sinf(angularPos2.getZ()) + 
-		effectiveArea* abs(cosf(angularPos2.getZ()))*cosf(angularPos2.getZ() + 3) - abs(sinf(angularPos2.getZ() + 3))
+		effectiveArea* abs(cosf(angularPos2.getZ()))*cosf(angularPos2.getZ() + 3.14/2) - abs(sinf(angularPos2.getZ() + 3.14))
 		*cosf(angularPos2.getZ() / 2 + 3.14 / 2)) / (farokskonstant);
 
 	//std::cout << flutter << '\n';*/
@@ -94,7 +92,7 @@ btVector3 Leaf::getAngVel()
 {	
 	btVector3 AngVel = btVector3(
 		leafBody->getLinearVelocity().getX()/0.035 ,
-		leafBody->getLinearVelocity().getY()/5,
+		leafBody->getLinearVelocity().getY(),
 		leafBody->getLinearVelocity().getZ()/0.035 );
 	rotation = rotation + AngVel;
 

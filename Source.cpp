@@ -177,7 +177,7 @@ int main()
 	}
 	
 	do{
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		//glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 		//glDepthMask(GL_TRUE);
@@ -206,7 +206,7 @@ int main()
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		//draw plane
-		glDrawArrays(GL_TRIANGLES, 6, 12);
+	//	glDrawArrays(GL_TRIANGLES, 6, 12);
 
 		float ratio;
 		int width, height;
@@ -220,7 +220,7 @@ int main()
 	
 		for (std::vector<Leaf>::iterator it = theLeaves.begin(); it != theLeaves.end(); ++it)
 		{	
-
+			
 			if (it->getBody()->getCenterOfMassPosition().getY() > -30.f){
 
 				btVector3 airCurrent2 = it->normVec(airCurrent);
@@ -244,16 +244,20 @@ int main()
 
 				btVector3 torqueVec = radius.cross(sumForces);
 				it->getBody()->applyTorque(torqueVec);
-				it->getBody()->setAngularVelocity(areaMult*it->getAngVel());
-
+				if ()
+					it->getBody()->setAngularVelocity(areaMult*it->getAngVel());
+				else
 				it->getBody()->applyCentralForce(airCurrent*mass);
 
-				if (areaMult >= 1)
-					std::cout << areaMult << endl;
-
+		
 				//it->getBody()->setAngularVelocity(it->noise());
 				it->getBody()->applyCentralForce(btVector3(0, airRes, 0));
-			
+
+				float torqueDampx = (-area / 2)*dens*0.05*(pow(0.05, 4)*pow(it->getAngVel().getX(), 2));
+				float torqueDampy = (-area / 2)*dens*0.05*(pow(0.05, 4)*pow(it->getAngVel().getY(), 2));
+				float torqueDampz = (-area / 2)*dens*0.05*(pow(0.05, 4)*pow(it->getAngVel().getZ(), 2));
+				it->getBody()->applyTorque(btVector3(torqueDampx, torqueDampy, torqueDampz));
+				
 				/*
 				it->getBody()->applyTorque(
 					btVector3(
